@@ -6,7 +6,7 @@ import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
-// Slide Data
+// Carousel Slides
 const slides = [
   {
     image:
@@ -35,73 +35,84 @@ const slides = [
     primaryButton: "Shop Attars",
     secondaryButton: "Learn More",
   },
-  {
-    image:
-      "https://cdn.prod.website-files.com/5e73b0054b9d003622f5c43e/6284e72cf00ecaca76d49c1c_Menswear-E-commerce-Photography-LRP-London-1.jpg",
-    heading: "Summer Essentials",
-    description:
-      "Lightweight Polo & T-shirts to keep you cool this season. Buy 1 Get 1 Free!",
-    primaryButton: "Shop Summer",
-    secondaryButton: "View Combos",
-  },
 ];
+
+// Categories
+const categories = ["PANJABI", "T-SHIRT", "POLO", "ATTAR", "COMBO", "TROUSER"];
 
 const Hero = () => {
   const sliderSettings = {
     dots: false,
     infinite: true,
-    speed: 1000,
+    speed: 800,
     autoplay: true,
-    autoplaySpeed: 3000,
+    autoplaySpeed: 2000,
     slidesToShow: 1,
     slidesToScroll: 1,
-    fade: true,
-    arrows: false,
+    arrows: false, // No prev/next buttons
   };
 
   return (
     <section className="relative h-screen overflow-hidden">
       {/* Background Carousel */}
-      <div className="absolute inset-0 z-0">
-        <Slider {...sliderSettings}>
-          {slides.map((slide, index) => (
-            <div key={index} className="relative h-screen w-full">
-              <Image
-                src={slide.image}
-                alt={`Slide ${index + 1}`}
-                layout="fill"
-                objectFit="cover"
-                priority
-                className="absolute inset-0"
-              />
-              {/* Dark overlay */}
-              <div className="absolute inset-0 bg-black/40"></div>
-              {/* Slide Text */}
-              <div className="container relative z-10 mx-auto px-4 py-16 lg:py-24 flex items-center justify-center">
-                <div className="text-center animate-fade-in">
-                  <h1 className="text-4xl lg:text-6xl font-bold text-white mb-6 leading-tight">
-                    {slide.heading}
-                  </h1>
-                  <p className="text-lg lg:text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-                    {slide.description}
-                  </p>
-                  <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                    <Button className="animate-scale-in">
-                      {slide.primaryButton}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="border-white hover:bg-white hover:text-black animate-scale-in"
+      <Slider {...sliderSettings} className="absolute inset-0 z-0">
+        {slides.map((slide, index) => (
+          <div key={index} className="relative h-screen w-full">
+            <Image
+              src={slide.image}
+              alt={`Slide ${index + 1}`}
+              layout="fill"
+              objectFit="cover"
+              priority
+              className="absolute inset-0"
+            />
+            {/* Dark overlay */}
+            <div className="absolute inset-0 bg-black/40"></div>
+
+            {/* Slide Text */}
+            <div className="container relative z-10 mx-auto px-4 py-16 lg:py-24 flex items-center justify-center">
+              <div className="text-center animate-fade-in">
+                <h1 className="text-4xl lg:text-6xl font-bold text-white mb-6 leading-tight">
+                  {slide.heading}
+                </h1>
+                <p className="text-lg lg:text-xl text-white/90 mb-8 max-w-2xl mx-auto">
+                  {slide.description}
+                </p>
+
+                {/* Buttons */}
+                <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
+                  <Button className="animate-scale-in">
+                    {slide.primaryButton}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="border-white  hover:bg-white hover:text-black animate-scale-in"
+                  >
+                    {slide.secondaryButton}
+                  </Button>
+                </div>
+
+                {/* Category Tags */}
+                <div
+                  className="flex flex-wrap gap-3 justify-center
+                    relative
+                    lg:absolute lg:bottom-8 lg:left-1/2 lg:-translate-x-1/2
+                  "
+                >
+                  {categories.map((category, index) => (
+                    <div
+                      key={index}
+                      className="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium text-white border border-white/30 hover:bg-white/30 transition-all cursor-pointer"
                     >
-                      {slide.secondaryButton}
-                    </Button>
-                  </div>
+                      {category}
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
-          ))}
-        </Slider>
-      </div>
+          </div>
+        ))}
+      </Slider>
     </section>
   );
 };
