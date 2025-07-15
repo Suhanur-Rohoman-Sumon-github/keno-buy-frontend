@@ -16,7 +16,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Company Info */}
           <div>
-            <h3 className="text-xl font-bold mb-4">Believer's Sign</h3>
+            <h3 className="text-xl font-bold mb-4">Believers Sign</h3>
             <p className="text-primary-foreground/80 mb-4">
               Your trusted destination for premium Islamic fashion, fragrances,
               and lifestyle products. Quality that speaks to your beliefs.
@@ -125,7 +125,7 @@ const Footer = () => {
                   placeholder="Enter your email"
                   className="bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/60"
                 />
-                <Button variant="accent" size="sm">
+                <Button  size="sm">
                   Subscribe
                 </Button>
               </div>
@@ -135,7 +135,7 @@ const Footer = () => {
 
         <div className="border-t border-primary-foreground/20 mt-8 pt-8 text-center">
           <p className="text-primary-foreground/80 text-sm">
-            &copy; 2024 Believer's Sign. All rights reserved. | Privacy Policy |
+            &copy; 2024 Believers Sign. All rights reserved. | Privacy Policy |
             Terms of Service
           </p>
         </div>
