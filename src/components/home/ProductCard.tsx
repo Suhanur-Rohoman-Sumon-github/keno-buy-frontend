@@ -36,7 +36,8 @@ const ProductCard = ({
   const [isWishlisted, setIsWishlisted] = useState(false);
 
   return (
-    <Card className="group hover:shadow-elegant transition-all duration-300 hover:-translate-y-1 border-0 bg-card/80 backdrop-blur-sm">
+    <Link href={`/product/${id}`} className="group">
+      <Card className="group hover:shadow-elegant transition-all duration-300 hover:-translate-y-1 border-0 bg-card/80 backdrop-blur-sm">
       <CardContent className="p-0">
         <div className="relative aspect-square overflow-hidden rounded-t-lg">
           <Image
@@ -77,19 +78,6 @@ const ProductCard = ({
               className={`h-4 w-4 ${isWishlisted ? "fill-current" : ""}`}
             />
           </Button>
-
-          {/* Quick Actions - Show on Hover */}
-          <div className="absolute inset-x-4 bottom-4 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-4 group-hover:translate-y-0">
-            <Button
-              className="w-full"
-              size="sm"
-              disabled={!inStock}
-              variant={inStock ? "default" : "secondary"}
-            >
-              <ShoppingCart className="h-4 w-4 mr-2" />
-              {inStock ? "Add to Cart" : "Out of Stock"}
-            </Button>
-          </div>
         </div>
 
         <div className="p-4">
@@ -142,6 +130,7 @@ const ProductCard = ({
         </div>
       </CardContent>
     </Card>
+    </Link>
   );
 };
 
