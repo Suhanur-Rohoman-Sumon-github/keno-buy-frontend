@@ -36,101 +36,114 @@ const ProductCard = ({
   const [isWishlisted, setIsWishlisted] = useState(false);
 
   return (
-    <Link href={`/product/${id}`} className="group">
-      <Card className="group hover:shadow-elegant transition-all duration-300 hover:-translate-y-1 border-0 bg-card/80 backdrop-blur-sm">
-      <CardContent className="p-0">
-        <div className="relative aspect-square overflow-hidden rounded-t-lg">
-          <Image
-            height={500}
-            width={500}
-            src={image}
-            alt={name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-          />
-
-          {/* Badges */}
-          <div className="absolute top-2 left-2 flex flex-col gap-1">
-            {discount && (
-              <Badge className="bg-destructive text-destructive-foreground">
-                {discount}% OFF
-              </Badge>
-            )}
-            {!inStock && (
-              <Badge
-                variant="secondary"
-                className="bg-muted text-muted-foreground"
-              >
-                Out of Stock
-              </Badge>
-            )}
-          </div>
-
-          {/* Wishlist */}
-          <Button
-            size="icon"
-            variant="ghost"
-            className={`absolute top-2 right-2 h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-all ${
-              isWishlisted ? "text-destructive" : "text-muted-foreground"
-            }`}
-            onClick={() => setIsWishlisted(!isWishlisted)}
-          >
-            <Heart
-              className={`h-4 w-4 ${isWishlisted ? "fill-current" : ""}`}
+    <Card className="hover:shadow-elegant transition-all duration-300 hover:-translate-y-1 border-0 bg-card/80 backdrop-blur-sm">
+      <Link href={`/product/${id}`} className="group">
+        <CardContent className="p-0">
+          <div className="relative aspect-square overflow-hidden rounded-t-lg">
+            <Image
+              height={500}
+              width={500}
+              src={image}
+              alt={name}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
-          </Button>
-        </div>
 
-        <div className="p-4">
-          {/* Rating */}
-          <div className="flex items-center gap-1 mb-2">
-            <div className="flex">
-              {[...Array(5)].map((_, i) => (
-                <Star
-                  key={i}
-                  className={`h-3 w-3 ${
-                    i < Math.floor(rating)
-                      ? "text-accent fill-current"
-                      : "text-muted-foreground"
-                  }`}
-                />
-              ))}
+            {/* Badges */}
+            <div className="absolute top-2 left-2 flex flex-col gap-1">
+              {discount && (
+                <Badge className="bg-destructive text-destructive-foreground">
+                  {discount}% OFF
+                </Badge>
+              )}
+              {!inStock && (
+                <Badge
+                  variant="secondary"
+                  className="bg-muted text-muted-foreground"
+                >
+                  Out of Stock
+                </Badge>
+              )}
             </div>
-            <span className="text-xs text-muted-foreground">({reviews})</span>
-          </div>
 
-          {/* Product Name */}
-          <Link href={`/product/${category}/${id}`}>
-            <h3 className="font-medium text-foreground mb-2 line-clamp-2 group-hover:text-primary transition-colors">
-              {name}
-            </h3>
-          </Link>
-
-          {/* Price */}
-          <div className="flex items-center gap-2 mb-3">
-            <span className="text-lg font-bold text-primary">৳{price}</span>
-            {originalPrice && (
-              <span className="text-sm text-muted-foreground line-through">
-                ৳{originalPrice}
-              </span>
-            )}
-          </div>
-
-          {/* Desktop Add to Cart */}
-          <div className="hidden group-hover:block lg:block">
+            {/* Wishlist */}
             <Button
-              className="w-full"
-              size="sm"
-              variant="outline"
-              disabled={!inStock}
+              size="icon"
+              variant="ghost"
+              className={`absolute top-2 right-2 h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-all ${
+                isWishlisted ? "text-destructive" : "text-muted-foreground"
+              }`}
+              onClick={(e) => {
+                e.preventDefault(); // Prevent navigating to the product page
+                setIsWishlisted(!isWishlisted);
+              }}
             >
-              <ShoppingCart className="h-4 w-4 mr-2" />
-              {inStock ? "Quick Add" : "Out of Stock"}
+              <Heart
+                className={`h-4 w-4 ${isWishlisted ? "fill-current" : ""}`}
+              />
             </Button>
           </div>
-        </div>
-      </CardContent>
+
+          <div className="p-4">
+            {/* Rating */}
+            <div className="flex items-center gap-1 mb-2">
+              <div className="flex">
+                {[...Array(5)].map((_, i) => (
+                  <Star
+                    key={i}
+                    className={`h-3 w-3 ${
+                      i < Math.floor(rating)
+                        ? "text-accent fill-current"
+                        : "text-muted-foreground"
+                    }`}
+                  />
+                ))}
+              </div>
+              <span className="text-xs text-muted-foreground">({reviews})</span>
+            </div>
+
+            {/* Product Name */}
+            <Link href={`/product/${category}/${id}`}>
+              <h3 className="font-medium text-foreground mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+                {name}
+              </h3>
+            </Link>
+
+            {/* Price */}
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-lg font-bold text-primary">৳{price}</span>
+              {originalPrice && (
+                <span className="text-sm text-muted-foreground line-through">
+                  ৳{originalPrice}
+                </span>
+              )}
+            </div>
+
+            {/* Always Visible Buttons */}
+          </div>
+        </CardContent>
+      </Link>
+      <div>
+        <Link href={"/checkout"} className="w-full">
+          <Button
+            className="w-full"
+            size="sm"
+            variant="default"
+            disabled={!inStock}
+          >
+            Buy Now
+          </Button>
+        </Link>
+        <Button
+          className="w-full mt-2"
+          size="sm"
+          variant="outline"
+          disabled={!inStock}
+        >
+          <ShoppingCart className="h-4 w-4 mr-1" />
+          Add to Cart
+        </Button>
+      </div>
     </Card>
-    </Link>
   );
 };
 

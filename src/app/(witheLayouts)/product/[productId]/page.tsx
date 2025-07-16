@@ -33,7 +33,7 @@ const ProductDetails = () => {
     price: 975,
     originalPrice: 1950,
     images: [
-      "https://images.unsplash.com/photo-1592947967884-b6ab6cd7b89e?w=800&h=800&fit=crop",
+      "https://images.unsplash.com/photo-1541643600914-78b084683601?w=800&h=800&fit=crop",
       "https://images.unsplash.com/photo-1541643600914-78b084683601?w=800&h=800&fit=crop",
       "https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=800&h=800&fit=crop",
     ],
@@ -322,7 +322,7 @@ const ProductDetails = () => {
                   className="flex-1"
                   variant="outline"
                   disabled={!product.inStock}
-                  style={{ borderColor: theme.primary, color: theme.primary }}
+                  
                 >
                   <ShoppingCart className="w-4 h-4 mr-2" />
                   Add to Cart
@@ -331,7 +331,7 @@ const ProductDetails = () => {
                   onClick={handleBuyNow}
                   className="flex-1"
                   disabled={!product.inStock}
-                  style={{ backgroundColor: theme.primary }}
+                
                 >
                   <CreditCard className="w-4 h-4 mr-2" />
                   Buy Now
@@ -432,7 +432,7 @@ const ProductDetails = () => {
           <h2 className="text-2xl font-bold text-foreground mb-8">
             Related Products
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {relatedProducts.map((relatedProduct) => (
               <ProductCard key={relatedProduct.id} {...relatedProduct} />
             ))}
