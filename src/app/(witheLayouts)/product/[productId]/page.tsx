@@ -20,6 +20,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import ProductCard from "@/components/home/ProductCard";
+import ReviewPage from "@/components/revew/RevewPage";
 
 const ProductDetails = () => {
   const [quantity, setQuantity] = useState(1);
@@ -322,7 +323,6 @@ const ProductDetails = () => {
                   className="flex-1"
                   variant="outline"
                   disabled={!product.inStock}
-                  
                 >
                   <ShoppingCart className="w-4 h-4 mr-2" />
                   Add to Cart
@@ -331,7 +331,6 @@ const ProductDetails = () => {
                   onClick={handleBuyNow}
                   className="flex-1"
                   disabled={!product.inStock}
-                
                 >
                   <CreditCard className="w-4 h-4 mr-2" />
                   Buy Now
@@ -418,9 +417,7 @@ const ProductDetails = () => {
               </TabsContent>
               <TabsContent value="reviews" className="mt-6">
                 <div className="text-center py-8">
-                  <p className="text-muted-foreground">
-                    Reviews section coming soon...
-                  </p>
+                  <ReviewPage />
                 </div>
               </TabsContent>
             </Tabs>
