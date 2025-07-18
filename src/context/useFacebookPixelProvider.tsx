@@ -19,7 +19,7 @@ const FacebookPixelProvider = ({ children }: Props) => {
           t.src=v;s=b.getElementsByTagName(e)[0];
           s.parentNode.insertBefore(t,s)}(window, document,'script',
           'https://connect.facebook.net/en_US/fbevents.js');
-          fbq('init', 'YOUR_PIXEL_ID'); 
+          fbq('init', '1144848137478287'); 
           fbq('track', 'PageView');
         `}
       </Script>
