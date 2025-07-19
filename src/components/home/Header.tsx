@@ -3,39 +3,28 @@ import { useState } from "react";
 import { Search, ShoppingCart, User, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
+import Image from "next/image";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false); // for mobile search toggle
   const [cartCount] = useState(3);
 
-  const categories = [
-    "Attar",
-    "Panjabi",
-    "T-Shirt",
-    "Polo",
-    "Pants & Trouser",
-    "Sneakers",
-    "Tupi",
-    "Natural Foods",
-    "Combo Offers",
-  ];
-
   return (
-    <header className="bg-background border-b shadow-card sticky top-0 z-50 w-full ">
-      {/* Top Bar */}
-      <div className="bg-primary text-primary-foreground py-2 text-center text-sm">
-        <p>Free shipping on orders over ৳500 | Call: +880-1234-567890</p>
-      </div>
-
+    <header className="bg-background border-b shadow-card sticky top-0 z-50 w-full">
       {/* Main Header */}
-      <div className="container mx-auto px-4 py-4 md:w-11/12 mx-auto">
+      <div className="container mx-auto px-4 py-4 md:w-11/12">
         <div className="flex items-center justify-between">
           {/* Logo */}
           <div className="flex items-center space-x-2">
             <Link href="/" className="text-2xl font-bold text-primary">
-              KenoBuy
+              <Image
+                height={50}
+                width={50}
+                alt="logo"
+                src="https://i.ibb.co/Xr95bbkT/Ecommerce-Logo-Keno-Buy-in-Teal-and-Gray-removebg-preview.png"
+              ></Image>
             </Link>
           </div>
 
@@ -58,10 +47,23 @@ const Header = () => {
           </div>
 
           {/* Right Actions */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
+            {/* Search Icon - Mobile */}
+            <Button
+              size="icon"
+              variant="ghost"
+              className="md:hidden"
+              onClick={() => setIsSearchOpen(!isSearchOpen)}
+            >
+              <Search className="h-5 w-5" />
+            </Button>
+
+            {/* User Icon */}
             <Button variant="ghost" size="icon" className="hidden md:flex">
               <User className="h-5 w-5" />
             </Button>
+
+            {/* Cart Icon */}
             <Link href="/cart">
               <Button variant="ghost" size="icon" className="relative">
                 <ShoppingCart className="h-5 w-5" />
@@ -72,60 +74,30 @@ const Header = () => {
                 )}
               </Button>
             </Link>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="md:hidden"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-            >
-              {isMenuOpen ? (
-                <X className="h-5 w-5" />
-              ) : (
-                <Menu className="h-5 w-5" />
-              )}
-            </Button>
           </div>
         </div>
 
-        {/* Mobile Search */}
-        <div className="md:hidden mt-4">
-          <div className="relative">
-            <Input
-              type="text"
-              placeholder="Search for products..."
-              className="pr-10"
-            />
-            <Button
-              size="icon"
-              variant="ghost"
-              className="absolute right-0 top-0 h-full"
-            >
-              <Search className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      {/* Navigation */}
-      <nav
-        className={`border-t bg-background ${
-          isMenuOpen ? "block" : "hidden md:block"
-        }`}
-      >
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row md:items-center md:space-x-8 py-2">
-            {categories.map((category, index) => (
+        {/* Mobile Search Bar */}
+        {isSearchOpen && (
+          <div className="md:hidden mt-3">
+            <div className="relative">
+              <Input
+                type="text"
+                placeholder="Search for products..."
+                className="pr-10"
+              />
               <Button
-                key={index}
+                size="icon"
                 variant="ghost"
-                className="justify-start md:justify-center py-3 md:py-2 text-left"
+                className="absolute right-0 top-0 h-full"
+                onClick={() => setIsSearchOpen(false)}
               >
-                {category}
+                <X className="h-4 w-4" />
               </Button>
-            ))}
+            </div>
           </div>
-        </div>
-      </nav>
+        )}
+      </div>
     </header>
   );
 };

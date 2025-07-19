@@ -21,6 +21,7 @@ const FacebookPixelProvider = ({ children }: Props) => {
           'https://connect.facebook.net/en_US/fbevents.js');
           fbq('init', '1144848137478287'); 
           fbq('track', 'PageView');
+          
         `}
       </Script>
       {children}

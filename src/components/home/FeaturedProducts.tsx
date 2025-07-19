@@ -10,7 +10,7 @@ const FeaturedProducts = () => {
       price: 975,
       originalPrice: 1950,
       image:
-        "https://images.unsplash.com/photo-1592947967884-b6ab6cd7b89e?w=500&h=500&fit=crop",
+        "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=500&h=500&fit=crop",
       discount: 50,
       rating: 4.8,
       reviews: 124,
@@ -97,33 +97,17 @@ const FeaturedProducts = () => {
   ];
 
   return (
-    <section className="py-16">
+    <section className="">
+      <h2 className="text-2xl font-bold text-center mb-6">
+        Explore our Products
+      </h2>
       <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center mb-12">
-          <div>
-            <h2 className="text-3xl lg:text-4xl font-bold text-foreground mb-2">
-              Featured Products
-            </h2>
-            <p className="text-muted-foreground">
-              Handpicked items from our premium collection
-            </p>
-          </div>
-          <Button variant="outline" className="hidden md:flex">
-            View All Products
-          </Button>
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-4">
           {products.map((product) => (
             <ProductCard key={product.id} {...product} />
           ))}
         </div>
 
-        <div className="text-center mt-8 md:hidden">
-          <Button variant="outline" className="w-full">
-            View All Products
-          </Button>
-        </div>
       </div>
     </section>
   );

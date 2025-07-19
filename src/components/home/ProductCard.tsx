@@ -33,13 +33,11 @@ const ProductCard = ({
   inStock,
   category = "attar",
 }: ProductCardProps) => {
-  const [isWishlisted, setIsWishlisted] = useState(false);
-
   return (
-    <Card className="hover:shadow-elegant transition-all duration-300 hover:-translate-y-1 border-0 bg-card/80 backdrop-blur-sm">
+    <Card className="     border-0">
       <Link href={`/product/${id}`} className="group">
         <CardContent className="p-0">
-          <div className="relative aspect-square overflow-hidden rounded-t-lg">
+          <div className="relative  overflow-hidden ">
             <Image
               height={500}
               width={500}
@@ -51,7 +49,7 @@ const ProductCard = ({
             {/* Badges */}
             <div className="absolute top-2 left-2 flex flex-col gap-1">
               {discount && (
-                <Badge className="bg-destructive text-destructive-foreground">
+                <Badge className="bg-destructive text-white">
                   {discount}% OFF
                 </Badge>
               )}
@@ -64,23 +62,6 @@ const ProductCard = ({
                 </Badge>
               )}
             </div>
-
-            {/* Wishlist */}
-            <Button
-              size="icon"
-              variant="ghost"
-              className={`absolute top-2 right-2 h-8 w-8 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background transition-all ${
-                isWishlisted ? "text-destructive" : "text-muted-foreground"
-              }`}
-              onClick={(e) => {
-                e.preventDefault(); // Prevent navigating to the product page
-                setIsWishlisted(!isWishlisted);
-              }}
-            >
-              <Heart
-                className={`h-4 w-4 ${isWishlisted ? "fill-current" : ""}`}
-              />
-            </Button>
           </div>
 
           <div className="p-4">
@@ -92,7 +73,7 @@ const ProductCard = ({
                     key={i}
                     className={`h-3 w-3 ${
                       i < Math.floor(rating)
-                        ? "text-accent fill-current"
+                        ? "text-yellow-500 fill-current"
                         : "text-muted-foreground"
                     }`}
                   />
@@ -103,13 +84,13 @@ const ProductCard = ({
 
             {/* Product Name */}
             <Link href={`/product/${category}/${id}`}>
-              <h3 className="font-medium text-foreground mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+              <h3 className="font-medium text-foreground mb-2 truncate group-hover:text-primary text-xs transition-colors">
                 {name}
               </h3>
             </Link>
 
             {/* Price */}
-            <div className="flex items-center gap-2 mb-3">
+            <div className="flex items-center gap-2 ">
               <span className="text-lg font-bold text-primary">৳{price}</span>
               {originalPrice && (
                 <span className="text-sm text-muted-foreground line-through">
@@ -122,7 +103,7 @@ const ProductCard = ({
           </div>
         </CardContent>
       </Link>
-      <div>
+      <div className="p-2 -mt-8">
         <Link href={"/checkout"} className="w-full">
           <Button
             className="w-full"

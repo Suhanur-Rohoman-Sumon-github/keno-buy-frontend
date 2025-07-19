@@ -7,48 +7,37 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  ArrowLeft,
-  CreditCard,
-  Truck,
-  MapPin,
-  Phone,
-  Mail,
-} from "lucide-react";
+import { ArrowLeft, CreditCard, Truck, MapPin, Phone } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
 const Checkout = () => {
- 
   const [paymentMethod, setPaymentMethod] = useState("cod");
   const [isProcessing, setIsProcessing] = useState(false);
 
   const [formData, setFormData] = useState({
     firstName: "",
-    lastName: "",
     email: "",
     phone: "",
     address: "",
-    city: "",
     district: "",
     postalCode: "",
     notes: "",
   });
 
-  // Sample cart items
   const cartItems = [
     {
       id: "1",
-      name: "Premium Attar Collection 3pcs Set",
+      name: "প্রিমিয়াম আতর কালেকশন ৩ পিস সেট",
       price: 975,
       originalPrice: 1950,
       quantity: 2,
       image:
-        "https://images.unsplash.com/photo-1592947967884-b6ab6cd7b89e?w=100&h=100&fit=crop",
+        "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=100&h=100&fit=crop",
     },
     {
       id: "2",
-      name: "Classic Cotton Panjabi - White",
+      name: "ক্লাসিক সাদা পাঞ্জাবি",
       price: 1200,
       originalPrice: 1500,
       quantity: 1,
@@ -76,11 +65,7 @@ const Checkout = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsProcessing(true);
-
-    // Simulate order processing
     setTimeout(() => {
-     
-      // Redirect to success page
       window.location.href = "/order-success";
       setIsProcessing(false);
     }, 2000);
@@ -89,17 +74,16 @@ const Checkout = () => {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
-        {/* Breadcrumb */}
         <nav className="text-sm text-muted-foreground mb-8">
           <Link href="/" className="hover:text-primary">
-            Home
+            হোম
           </Link>
           <span className="mx-2">/</span>
           <Link href="/cart" className="hover:text-primary">
-            Cart
+            কার্ট
           </Link>
           <span className="mx-2">/</span>
-          <span className="text-foreground">Checkout</span>
+          <span className="text-foreground">চেকআউট</span>
         </nav>
 
         <div className="flex items-center gap-4 mb-8">
@@ -108,7 +92,7 @@ const Checkout = () => {
             className="inline-flex items-center text-sm text-muted-foreground hover:text-primary"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Cart
+            কার্টে ফিরে যান
           </Link>
         </div>
 
@@ -119,52 +103,24 @@ const Checkout = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <MapPin className="w-5 h-5" />
-                  Delivery Information
+                  ডেলিভারি তথ্য
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="firstName">First Name *</Label>
-                      <Input
-                        id="firstName"
-                        name="firstName"
-                        value={formData.firstName}
-                        onChange={handleInputChange}
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="lastName">Last Name *</Label>
-                      <Input
-                        id="lastName"
-                        name="lastName"
-                        value={formData.lastName}
-                        onChange={handleInputChange}
-                        required
-                      />
-                    </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="firstName">আপনার নাম *</Label>
+                    <Input
+                      id="firstName"
+                      name="firstName"
+                      value={formData.firstName}
+                      onChange={handleInputChange}
+                      required
+                    />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email Address *</Label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                      <Input
-                        id="email"
-                        name="email"
-                        type="email"
-                        className="pl-10"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="phone">Phone Number *</Label>
+                    <Label htmlFor="phone">মোবাইল নাম্বার *</Label>
                     <div className="relative">
                       <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
                       <Input
@@ -172,7 +128,7 @@ const Checkout = () => {
                         name="phone"
                         type="tel"
                         className="pl-10"
-                        placeholder="+880 1234 567890"
+                        placeholder="+৮৮০ ১২৩৪ ৫৬৭৮৯০"
                         value={formData.phone}
                         onChange={handleInputChange}
                         required
@@ -181,56 +137,109 @@ const Checkout = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="address">Full Address *</Label>
+                    <Label htmlFor="address">সম্পূর্ণ ঠিকানা *</Label>
                     <Textarea
                       id="address"
                       name="address"
-                      placeholder="House/Building, Street, Area"
+                      placeholder="বাড়ি/বিল্ডিং, রাস্তা, এলাকা"
                       value={formData.address}
                       onChange={handleInputChange}
                       required
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="city">City *</Label>
-                      <Input
-                        id="city"
-                        name="city"
-                        value={formData.city}
-                        onChange={handleInputChange}
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="district">District *</Label>
-                      <Input
-                        id="district"
-                        name="district"
-                        value={formData.district}
-                        onChange={handleInputChange}
-                        required
-                      />
-                    </div>
+                  {/* Dropdown with Districts */}
+                  <div className="space-y-2">
+                    <Label htmlFor="district">জেলা নির্বাচন করুন *</Label>
+                    <select
+                      id="district"
+                      name="district"
+                      value={formData.district}
+                      onChange={(e) =>
+                        setFormData({ ...formData, district: e.target.value })
+                      }
+                      required
+                      className="w-full border rounded-md px-4 py-2 text-sm"
+                    >
+                      <option value="">-- জেলা নির্বাচন করুন --</option>
+                      {[
+                        "ঢাকা",
+                        "ফরিদপুর",
+                        "গাজীপুর",
+                        "গোপালগঞ্জ",
+                        "জামালপুর",
+                        "কিশোরগঞ্জ",
+                        "মাদারীপুর",
+                        "মানিকগঞ্জ",
+                        "মুন্সিগঞ্জ",
+                        "ময়মনসিংহ",
+                        "নারায়ণগঞ্জ",
+                        "নরসিংদী",
+                        "নেত্রকোনা",
+                        "রাজবাড়ী",
+                        "শরীয়তপুর",
+                        "টাঙ্গাইল",
+                        "বগুড়া",
+                        "চাঁপাইনবাবগঞ্জ",
+                        "জয়পুরহাট",
+                        "নওগাঁ",
+                        "নাটোর",
+                        "পাবনা",
+                        "রাজশাহী",
+                        "সিরাজগঞ্জ",
+                        "দিনাজপুর",
+                        "গাইবান্ধা",
+                        "কুড়িগ্রাম",
+                        "লালমনিরহাট",
+                        "নীলফামারী",
+                        "পঞ্চগড়",
+                        "রংপুর",
+                        "ঠাকুরগাঁও",
+                        "বরগুনা",
+                        "বরিশাল",
+                        "ভোলা",
+                        "ঝালকাঠি",
+                        "পটুয়াখালী",
+                        "পিরোজপুর",
+                        "বান্দরবান",
+                        "ব্রাহ্মণবাড়িয়া",
+                        "চাঁদপুর",
+                        "চট্টগ্রাম",
+                        "কুমিল্লা",
+                        "কক্সবাজার",
+                        "ফেনী",
+                        "খাগড়াছড়ি",
+                        "লক্ষ্মীপুর",
+                        "নোয়াখালী",
+                        "রাঙ্গামাটি",
+                        "হবিগঞ্জ",
+                        "মৌলভীবাজার",
+                        "সুনামগঞ্জ",
+                        "সিলেট",
+                        "বাগেরহাট",
+                        "চুয়াডাঙ্গা",
+                        "যশোর",
+                        "ঝিনাইদহ",
+                        "খুলনা",
+                        "কুষ্টিয়া",
+                        "মাগুরা",
+                        "মেহেরপুর",
+                        "নড়াইল",
+                        "সাতক্ষীরা",
+                      ].map((district) => (
+                        <option key={district} value={district}>
+                          {district}
+                        </option>
+                      ))}
+                    </select>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="postalCode">Postal Code</Label>
-                    <Input
-                      id="postalCode"
-                      name="postalCode"
-                      value={formData.postalCode}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="notes">Order Notes (Optional)</Label>
+                    <Label htmlFor="notes">অতিরিক্ত নির্দেশনা (ঐচ্ছিক)</Label>
                     <Textarea
                       id="notes"
                       name="notes"
-                      placeholder="Any special instructions for delivery"
+                      placeholder="ডেলিভারির জন্য কোনো বিশেষ নির্দেশনা থাকলে লিখুন"
                       value={formData.notes}
                       onChange={handleInputChange}
                     />
@@ -244,7 +253,7 @@ const Checkout = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <CreditCard className="w-5 h-5" />
-                  Payment Method
+                  পেমেন্ট মাধ্যম
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -257,44 +266,12 @@ const Checkout = () => {
                     <Label htmlFor="cod" className="flex-1 cursor-pointer">
                       <div className="flex items-center justify-between">
                         <div>
-                          <div className="font-medium">Cash on Delivery</div>
+                          <div className="font-medium">ক্যাশ অন ডেলিভারি</div>
                           <div className="text-sm text-muted-foreground">
-                            Pay when you receive your order
+                            পণ্য গ্রহণের সময় টাকা দিন
                           </div>
                         </div>
                         <Truck className="w-5 h-5 text-muted-foreground" />
-                      </div>
-                    </Label>
-                  </div>
-
-                  <div className="flex items-center space-x-2 p-4 border rounded-lg opacity-50">
-                    <RadioGroupItem value="bkash" id="bkash" disabled />
-                    <Label htmlFor="bkash" className="flex-1 cursor-pointer">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="font-medium">bKash Payment</div>
-                          <div className="text-sm text-muted-foreground">
-                            Coming soon
-                          </div>
-                        </div>
-                        <div className="w-8 h-8 bg-pink-500 rounded flex items-center justify-center text-white text-xs font-bold">
-                          bK
-                        </div>
-                      </div>
-                    </Label>
-                  </div>
-
-                  <div className="flex items-center space-x-2 p-4 border rounded-lg opacity-50">
-                    <RadioGroupItem value="card" id="card" disabled />
-                    <Label htmlFor="card" className="flex-1 cursor-pointer">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="font-medium">Credit/Debit Card</div>
-                          <div className="text-sm text-muted-foreground">
-                            Coming soon
-                          </div>
-                        </div>
-                        <CreditCard className="w-5 h-5 text-muted-foreground" />
                       </div>
                     </Label>
                   </div>
@@ -307,10 +284,9 @@ const Checkout = () => {
           <div>
             <Card className="sticky top-4">
               <CardHeader>
-                <CardTitle>Order Summary</CardTitle>
+                <CardTitle>অর্ডার সারাংশ</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* Order Items */}
                 <div className="space-y-4">
                   {cartItems.map((item) => (
                     <div key={item.id} className="flex gap-3">
@@ -329,7 +305,7 @@ const Checkout = () => {
                         </h4>
                         <div className="flex items-center justify-between mt-1">
                           <span className="text-sm text-muted-foreground">
-                            Qty: {item.quantity}
+                            পরিমাণ: {item.quantity}
                           </span>
                           <span className="font-medium">
                             ৳{item.price * item.quantity}
@@ -342,21 +318,20 @@ const Checkout = () => {
 
                 <Separator />
 
-                {/* Pricing */}
                 <div className="space-y-2">
                   <div className="flex justify-between">
-                    <span>Subtotal</span>
+                    <span>সাবটোটাল</span>
                     <span>৳{subtotal}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Shipping</span>
+                    <span>শিপিং</span>
                     <span className={shipping === 0 ? "text-green-600" : ""}>
-                      {shipping === 0 ? "FREE" : `৳${shipping}`}
+                      {shipping === 0 ? "ফ্রি" : `৳${shipping}`}
                     </span>
                   </div>
                   <Separator />
                   <div className="flex justify-between text-lg font-bold">
-                    <span>Total</span>
+                    <span>মোট</span>
                     <span>৳{total}</span>
                   </div>
                 </div>
@@ -367,21 +342,23 @@ const Checkout = () => {
                   size="lg"
                   disabled={isProcessing}
                 >
-                  {isProcessing ? "Processing..." : `Place Order - ৳${total}`}
+                  {isProcessing
+                    ? "প্রসেসিং..."
+                    : `অর্ডার নিশ্চিত করুন - ৳${total}`}
                 </Button>
 
                 <div className="text-sm text-muted-foreground mt-4">
                   <div className="flex items-center gap-2 mb-2">
                     <span>✓</span>
-                    <span>Secure checkout process</span>
+                    <span>নিরাপদ চেকআউট প্রসেস</span>
                   </div>
                   <div className="flex items-center gap-2 mb-2">
                     <span>✓</span>
-                    <span>Free returns within 7 days</span>
+                    <span>৭ দিনের মধ্যে ফ্রি রিটার্ন</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span>✓</span>
-                    <span>Customer support 24/7</span>
+                    <span>২৪/৭ গ্রাহক সহায়তা</span>
                   </div>
                 </div>
               </CardContent>
@@ -389,8 +366,6 @@ const Checkout = () => {
           </div>
         </div>
       </div>
-
-    
     </div>
   );
 };
