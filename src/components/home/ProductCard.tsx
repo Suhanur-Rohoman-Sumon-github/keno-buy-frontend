@@ -39,7 +39,7 @@ const ProductCard = ({
   const handleAddToCart = () => {
     if (typeof window !== "undefined") {
       const existingCart = localStorage.getItem("cartItems");
-      let cartArray = existingCart ? JSON.parse(existingCart) : [];
+      const cartArray = existingCart ? JSON.parse(existingCart) : [];
 
       // Check if product is already in cart
       if (!cartArray.includes(id)) {
