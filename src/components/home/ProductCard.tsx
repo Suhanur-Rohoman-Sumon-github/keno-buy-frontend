@@ -33,11 +33,28 @@ const ProductCard = ({
   inStock,
   category = "attar",
 }: ProductCardProps) => {
+  const [addedToCart, setAddedToCart] = useState(false);
+
+  // Function to add product to localStorage
+  const handleAddToCart = () => {
+    if (typeof window !== "undefined") {
+      const existingCart = localStorage.getItem("cartItems");
+      let cartArray = existingCart ? JSON.parse(existingCart) : [];
+
+      // Check if product is already in cart
+      if (!cartArray.includes(id)) {
+        cartArray.push(id);
+        localStorage.setItem("cartItems", JSON.stringify(cartArray));
+        setAddedToCart(true);
+      }
+    }
+  };
+
   return (
-    <Card className="     border-0">
+    <Card className="border-0">
       <Link href={`/product/${id}`} className="group">
         <CardContent className="p-0">
-          <div className="relative  overflow-hidden ">
+          <div className="relative overflow-hidden">
             <Image
               height={500}
               width={500}
@@ -90,7 +107,7 @@ const ProductCard = ({
             </Link>
 
             {/* Price */}
-            <div className="flex items-center gap-2 ">
+            <div className="flex items-center gap-2">
               <span className="text-lg font-bold text-primary">৳{price}</span>
               {originalPrice && (
                 <span className="text-sm text-muted-foreground line-through">
@@ -98,8 +115,6 @@ const ProductCard = ({
                 </span>
               )}
             </div>
-
-            {/* Always Visible Buttons */}
           </div>
         </CardContent>
       </Link>
@@ -119,9 +134,10 @@ const ProductCard = ({
           size="sm"
           variant="outline"
           disabled={!inStock}
+          onClick={handleAddToCart}
         >
           <ShoppingCart className="h-4 w-4 mr-1" />
-          Add to Cart
+          {addedToCart ? "Added" : "Add to Cart"}
         </Button>
       </div>
     </Card>
