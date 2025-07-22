@@ -1,16 +1,6 @@
-
 import ProductCard from "./ProductCard";
 
 const FeaturedProducts = () => {
-  const categories = [
-    "PANJABI",
-    "T-SHIRT",
-    "POLO",
-    "ATTAR",
-    "COMBO",
-    "TROUSER",
-  ];
-
   // Sample product data
   const products = [
     {
@@ -107,17 +97,6 @@ const FeaturedProducts = () => {
 
   return (
     <section className="">
-      <div className="grid grid-cols-3 md:flex md:justify-between gap-3 px-1 mb-6">
-        {categories.map((category, idx) => (
-          <div
-            key={idx}
-            className="w-full text-center text-sm md:text-base font-medium  bg-white/10 backdrop-blur-lg border border-white/30 shadow-md rounded-xl py-2 px-3 hover:bg-white/20 transition-colors duration-300"
-          >
-            {category}
-          </div>
-        ))}
-      </div>
-
       <h2 className="text-2xl font-bold text-center mb-6">
         Explore our Products
       </h2>
