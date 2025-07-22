@@ -1,6 +1,4 @@
 "use client";
-
-import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
@@ -35,8 +33,6 @@ const slides = [
     secondaryButton: "Learn More",
   },
 ];
-
-const categories = ["PANJABI", "T-SHIRT", "POLO", "ATTAR", "COMBO", "TROUSER"];
 
 const Hero = () => {
   const sliderSettings = {
