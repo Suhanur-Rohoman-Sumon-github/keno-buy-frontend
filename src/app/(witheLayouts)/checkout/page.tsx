@@ -51,14 +51,11 @@ const Checkout = () => {
     setUserEmail(email);
   }, []);
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      const productId = params.get("productId");
-      setProductId(productId);
-      // Your logic here
-    }
-  }, []);
+ useEffect(() => {
+   const searchParams = new URLSearchParams(window.location.search);
+   const productIdPeram = searchParams.get("productId");
+   setProductId(productIdPeram);
+ }, []);
 
   // Fetch single product if productId exists
   const { data: singleProduct } = useGetSingleProduct(productId || "");
