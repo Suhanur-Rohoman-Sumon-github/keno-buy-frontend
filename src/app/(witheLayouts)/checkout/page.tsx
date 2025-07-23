@@ -27,12 +27,12 @@ interface CartItem {
 
 const Checkout = () => {
   const router = useRouter();
- 
 
   const [paymentMethod, setPaymentMethod] = useState("cod");
   const [isProcessing, setIsProcessing] = useState(false);
   const [checkoutItems, setCheckoutItems] = useState<CartItem[]>([]);
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [productId, setProductId] = useState<string | null>(null);
 
   // Delivery form
   const [formData, setFormData] = useState({
@@ -44,13 +44,20 @@ const Checkout = () => {
   });
 
   // Get productId from query params
-  const params = new URLSearchParams(window.location.search);
-  const productId = params.get("productId");
 
   // Fetch userEmail from localStorage
   useEffect(() => {
     const email = localStorage.getItem("userEmail");
     setUserEmail(email);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const productId = params.get("productId");
+      setProductId(productId);
+      // Your logic here
+    }
   }, []);
 
   // Fetch single product if productId exists
