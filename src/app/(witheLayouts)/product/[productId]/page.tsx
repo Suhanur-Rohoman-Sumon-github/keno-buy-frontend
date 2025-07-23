@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -21,45 +22,55 @@ import Image from "next/image";
 import Link from "next/link";
 import ProductCard from "@/components/home/ProductCard";
 import ReviewPage from "@/components/revew/RevewPage";
+import { useParams } from "next/navigation";
+import { useGetSingleProduct } from "@/hooks/product.hook";
 
 const ProductDetails = () => {
+  const { productId } = useParams();
+  console.log("Product ID:", productId);
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
-  const [isWishlisted, setIsWishlisted] = useState(false);
+
+  const { data: product, isLoading } = useGetSingleProduct(productId as string);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+  console.log("Product Data:", product);
 
   // Sample product data - in real app, this would come from API
-  const product = {
-    id: "1",
-    name: "Premium Attar Collection 3pcs Set",
-    price: 975,
-    originalPrice: 1950,
-    images: [
-      "https://images.unsplash.com/photo-1541643600914-78b084683601?w=800&h=800&fit=crop",
-      "https://images.unsplash.com/photo-1541643600914-78b084683601?w=800&h=800&fit=crop",
-      "https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=800&h=800&fit=crop",
-    ],
-    discount: 50,
-    rating: 4.8,
-    reviews: 124,
-    inStock: true,
-    description:
-      "Experience the luxury of our premium attar collection. This carefully curated 3-piece set features our most popular fragrances, each crafted with the finest natural ingredients.",
-    features: [
-      "100% Natural ingredients",
-      "Long-lasting fragrance",
-      "Alcohol-free formula",
-      "Traditional distillation process",
-    ],
-    specifications: {
-      Brand: "Believers Sign",
-      Volume: "3ml each",
-      Type: "Attar/Essential Oil",
-      Origin: "Bangladesh",
-      "Shelf Life": "3 years",
-    },
-    category: "attar",
-    tags: ["Premium", "Natural", "Traditional", "Gift Set"],
-  };
+  // const product = {
+  //   id: "1",
+  //   name: "Premium Attar Collection 3pcs Set",
+  //   price: 975,
+  //   originalPrice: 1950,
+  //   images: [
+  //     "https://images.unsplash.com/photo-1541643600914-78b084683601?w=800&h=800&fit=crop",
+  //     "https://images.unsplash.com/photo-1541643600914-78b084683601?w=800&h=800&fit=crop",
+  //     "https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=800&h=800&fit=crop",
+  //   ],
+  //   discount: 50,
+  //   rating: 4.8,
+  //   reviews: 124,
+  //   inStock: true,
+  //   description:
+  //     "Experience the luxury of our premium attar collection. This carefully curated 3-piece set features our most popular fragrances, each crafted with the finest natural ingredients.",
+  //   features: [
+  //     "100% Natural ingredients",
+  //     "Long-lasting fragrance",
+  //     "Alcohol-free formula",
+  //     "Traditional distillation process",
+  //   ],
+  //   specifications: {
+  //     Brand: "Believers Sign",
+  //     Volume: "3ml each",
+  //     Type: "Attar/Essential Oil",
+  //     Origin: "Bangladesh",
+  //     "Shelf Life": "3 years",
+  //   },
+  //   category: "attar",
+  //   tags: ["Premium", "Natural", "Traditional", "Gift Set"],
+  // };
 
   // Category-specific styling
   const getCategoryTheme = (category: string) => {
@@ -108,7 +119,7 @@ const ProductDetails = () => {
     return themes[category as keyof typeof themes] || themes.attar;
   };
 
-  const theme = getCategoryTheme(product.category);
+  const theme = getCategoryTheme(product?.category);
 
   // Related products
   const relatedProducts = [
@@ -177,10 +188,10 @@ const ProductDetails = () => {
           </Link>
           <span className="mx-2">/</span>
           <Link
-            href={`/category/${product.category}`}
+            href={`/category/${product?.category}`}
             className="hover:text-primary capitalize"
           >
-            {product.category.replace("-", " ")}
+            {product?.category.replace("-", " ")}
           </Link>
           <span className="mx-2">/</span>
           <span className="text-foreground">{product.name}</span>
@@ -202,7 +213,7 @@ const ProductDetails = () => {
               />
             </div>
             <div className="grid grid-cols-3 gap-2">
-              {product.images.map((image, index) => (
+              {product.images.map((image: string, index: number) => (
                 <button
                   key={index}
                   onClick={() => setSelectedImage(index)}
@@ -228,7 +239,7 @@ const ProductDetails = () => {
           <div className="space-y-6">
             <div>
               <div className="flex items-center gap-2 mb-2">
-                {product.tags.map((tag) => (
+                {product.tags.map((tag: any) => (
                   <Badge
                     key={tag}
                     variant="secondary"
@@ -338,16 +349,6 @@ const ProductDetails = () => {
               </div>
 
               <div className="flex gap-3">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={handleWishlist}
-                  className={isWishlisted ? "text-red-500 border-red-500" : ""}
-                >
-                  <Heart
-                    className={`w-4 h-4 ${isWishlisted ? "fill-red-500" : ""}`}
-                  />
-                </Button>
                 <Button variant="outline" size="icon">
                   <Share2 className="w-4 h-4" />
                 </Button>
@@ -391,16 +392,18 @@ const ProductDetails = () => {
                   <div>
                     <h4 className="font-semibold mb-2">Key Features:</h4>
                     <ul className="list-disc list-inside space-y-1">
-                      {product.features.map((feature, index) => (
-                        <li key={index} className="text-muted-foreground">
-                          {feature}
-                        </li>
-                      ))}
+                      {product.features.map(
+                        (feature: string, index: number) => (
+                          <li key={index} className="text-muted-foreground">
+                            {feature}
+                          </li>
+                        )
+                      )}
                     </ul>
                   </div>
                 </div>
               </TabsContent>
-              <TabsContent value="specifications" className="mt-6">
+              {/* <TabsContent value="specifications" className="mt-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {Object.entries(product.specifications).map(
                     ([key, value]) => (
@@ -414,7 +417,7 @@ const ProductDetails = () => {
                     )
                   )}
                 </div>
-              </TabsContent>
+              </TabsContent> */}
               <TabsContent value="reviews" className="mt-6">
                 <div className="text-center py-8">
                   <ReviewPage />

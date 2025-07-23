@@ -11,7 +11,7 @@ import {
 } from "@/services/productService";
 
 // Fetch all products
-export const useGetProducts = (query?: Record<string, string>) =>
+export const useGetProductsQuery = (query?: Record<string, string>) =>
   useQuery({
     queryKey: ["products", query],
     queryFn: () => getAllProducts(query),

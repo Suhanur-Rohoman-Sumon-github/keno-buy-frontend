@@ -9,19 +9,19 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-export const useGetCart = (userId: string) =>
+export const useGetCart = (userEmail: string) =>
   useQuery({
-    queryKey: ["cart", userId],
-    queryFn: () => getCart(userId),
-    enabled: !!userId,
+    queryKey: ["cart", userEmail],
+    queryFn: () => getCart(userEmail),
+    enabled: !!userEmail,
   });
 
 export const useAddToCartMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationKey: ["add to cart"],
-    mutationFn: async (params: { userId: string; productId: string; quantity?: number }) =>
-      addToCart(params.userId, params.productId, params.quantity || 1),
+    mutationFn: async (params: { userEmail:string; productId: string; quantity?: number }) =>
+      addToCart(params.userEmail, params.productId, params.quantity || 1),
     onSuccess: () => {
       toast.success("Product added to cart");
       queryClient.invalidateQueries({ queryKey: ["cart"] });

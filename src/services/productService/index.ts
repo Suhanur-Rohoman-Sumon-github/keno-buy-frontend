@@ -6,18 +6,21 @@ import axiosInstance from "@/lib/AxiosInostance";
 // ✅ Get all products (supports search/filter/pagination)
 export const getAllProducts = async (query?: Record<string, string>) => {
   try {
-    const { data } = await axiosInstance.get("/products", { params: query });
-    return data;
+    const { data } = await axiosInstance.get("/products");
+    
+    return data.data || [];
   } catch (error: any) {
-    throw new Error(error.response?.data?.message || "Failed to fetch products");
+    throw new Error(error.response || "Failed to fetch products");
   }
 };
 
 // ✅ Get single product by ID
 export const getSingleProduct = async (productId: string) => {
+console.log(`Fetching product with ID: ${productId}`);
   try {
     const { data } = await axiosInstance.get(`/products/${productId}`);
-    return data;
+    console.log(data);
+    return data.data || {};
   } catch (error: any) {
     throw new Error(error.response?.data?.message || "Failed to fetch product");
   }

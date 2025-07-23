@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -6,40 +7,50 @@ import { Badge } from "@/components/ui/badge";
 import { X, Trash2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-
-interface CartItem {
-  id: string;
-  name: string;
-  price: number;
-  quantity: number;
-  image: string;
-}
-
-const cartItems: CartItem[] = [
-  {
-    id: "1",
-    name: "Premium Attar Oil - Oud",
-    price: 1200,
-    quantity: 2,
-    image:
-      "https://images.unsplash.com/photo-1541643600914-78b084683601?w=800&h=800&fit=crop",
-  },
-  {
-    id: "2",
-    name: "Luxury Attar Musk",
-    price: 900,
-    quantity: 1,
-    image:
-      "https://images.unsplash.com/photo-1541643600914-78b084683601?w=800&h=800&fit=crop",
-  },
-];
+import { useEffect, useState } from "react";
+import { useGetCart } from "@/hooks/cart.hook";
 
 const CartPage = () => {
-  const subtotal = cartItems.reduce(
-    (total, item) => total + item.price * item.quantity,
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+
+  // ✅ On mount, get email from localStorage
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const email = localStorage.getItem("userEmail");
+      if (email) {
+        setUserEmail(email);
+      }
+    }
+  }, []);
+
+  // ✅ Only fetch cart if userEmail is available
+  const { data: cartData, isLoading } = useGetCart(userEmail || "");
+
+  if (!userEmail) {
+    return (
+      <div className="text-center p-4">
+        <p className="text-muted-foreground">No user session found.</p>
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return <div className="text-center p-4">Loading your cart...</div>;
+  }
+
+  if (!cartData || cartData.items?.length === 0) {
+    return (
+      <div className="text-center p-4">
+        <p className="text-muted-foreground">Your cart is empty.</p>
+      </div>
+    );
+  }
+
+  const subtotal = cartData.items.reduce(
+    (total: number, item: any) => total + item.product.price * item.quantity,
     0
   );
-  const discount = 0; // Add your discount logic if needed
+  const discount = 0;
   const total = subtotal - discount;
 
   return (
@@ -55,21 +66,21 @@ const CartPage = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Cart Items */}
         <div className="lg:col-span-2 space-y-4">
-          {cartItems.map((item) => (
-            <Card key={item.id} className="flex items-center gap-4 p-4">
+          {cartData.items.map((item: any) => (
+            <Card key={item._id} className="flex items-center gap-4 p-4">
               <div className="w-24 h-24 relative rounded overflow-hidden">
                 <Image
-                  src={item.image}
-                  alt={item.name}
+                  src={item.product.image}
+                  alt={item.product.name}
                   layout="fill"
                   objectFit="cover"
                 />
               </div>
               <div className="flex-1">
-                <h3 className="font-medium text-lg">{item.name}</h3>
+                <h3 className="font-medium text-lg">{item.product.name}</h3>
                 <div className="flex items-center gap-2 mt-1">
                   <span className="text-primary font-semibold">
-                    ৳{item.price}
+                    ৳{item.product.price}
                   </span>
                   <Badge variant="outline">Qty: {item.quantity}</Badge>
                 </div>

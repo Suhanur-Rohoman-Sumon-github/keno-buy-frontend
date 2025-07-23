@@ -1,15 +1,17 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Heart, ShoppingCart, Star } from "lucide-react";
+import { ShoppingCart, Star } from "lucide-react";
 import { useState } from "react";
 
 import Image from "next/image";
 import Link from "next/link";
+import { useAddToCartMutation } from "@/hooks/cart.hook";
 
 interface ProductCardProps {
-  id: string;
+  _id?: string;
   name: string;
   price: number;
   originalPrice?: number;
@@ -22,7 +24,7 @@ interface ProductCardProps {
 }
 
 const ProductCard = ({
-  id,
+  _id,
   name,
   price,
   originalPrice,
@@ -35,26 +37,36 @@ const ProductCard = ({
 }: ProductCardProps) => {
   const [addedToCart, setAddedToCart] = useState(false);
 
+  const { mutate: addTocart } = useAddToCartMutation();
+
   // Function to add product to localStorage
   const handleAddToCart = () => {
     if (typeof window !== "undefined") {
-      const existingCart = localStorage.getItem("cartItems");
-      const cartArray = existingCart ? JSON.parse(existingCart) : [];
-
-      // Check if product is already in cart
-      if (!cartArray.includes(id)) {
-        cartArray.push(id);
-        localStorage.setItem("cartItems", JSON.stringify(cartArray));
-        setAddedToCart(true);
+      // 🔥 1. Generate random email if not already in localStorage
+      let userEmail = localStorage.getItem("userEmail");
+      if (!userEmail) {
+        const randomEmail = `user${Math.floor(
+          Math.random() * 100000
+        )}@example.com`;
+        localStorage.setItem("userEmail", randomEmail);
+        userEmail = randomEmail;
+        console.log("Generated random email:", randomEmail);
       }
+
+      // ✅ 2. Call API mutation to save cart
+      addTocart({
+        userEmail: userEmail,
+        productId: _id || "",
+        quantity: 1, // Default quantity to 1
+      });
     }
   };
 
   return (
     <Card className="border-0">
-      <Link href={`/product/${id}`} className="group">
+      <Link href={`/product/${_id}`} className="group">
         <CardContent className="p-0">
-          <div className="relative overflow-hidden">
+          <div className="relative overflow-h_idden">
             <Image
               height={500}
               width={500}
@@ -100,7 +112,7 @@ const ProductCard = ({
             </div>
 
             {/* Product Name */}
-            <Link href={`/product/${category}/${id}`}>
+            <Link href={`/product/${category}/${_id}`}>
               <h3 className="font-medium text-foreground mb-2 truncate group-hover:text-primary text-xs transition-colors">
                 {name}
               </h3>
@@ -119,7 +131,7 @@ const ProductCard = ({
         </CardContent>
       </Link>
       <div className="p-2 -mt-8">
-        <Link href={"/checkout"} className="w-full">
+        <Link href={`/checkout?productId=${_id}`} className="w-full">
           <Button
             className="w-full"
             size="sm"

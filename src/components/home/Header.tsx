@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -7,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import Image from "next/image";
 import clsx from "clsx";
+import { useGetCart } from "@/hooks/cart.hook";
 
 const Header = () => {
   const router = useRouter();
@@ -14,7 +16,34 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [cartCount, setCartCount] = useState(0);
+
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+
+  // 1. On mount, get the email from localStorage
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const email = localStorage.getItem("userEmail");
+      setUserEmail(email);
+    }
+  }, []);
+
+  console.log("User Email:", userEmail);
+
+  // 2. Fetch cart with react-query hook once we have the userEmail
+  const { data: cartData, isLoading } = useGetCart(userEmail || "");
+
+  if (isLoading) {
+    return <div className="text-center p-4"></div>;
+  }
+
+  console.log(cartData);
+
+  // 3. Calculate cart count from backend data (fallback to 0)
+  const cartCount =
+    cartData?.items?.reduce(
+      (sum: number, item: any) => sum + item.quantity,
+      0
+    ) || 0;
 
   const categories = [
     "Attar",
@@ -30,29 +59,19 @@ const Header = () => {
 
   const updateCartCount = () => {
     const storedCart = localStorage.getItem("cartItems");
-    if (storedCart) {
-      try {
-        const cartArray = JSON.parse(storedCart);
-        setCartCount(Array.isArray(cartArray) ? cartArray.length : 0);
-      } catch {
-        setCartCount(0);
-      }
-    } else {
-      setCartCount(0);
-    }
   };
 
-  useEffect(() => {
-    updateCartCount();
+  // useEffect(() => {
+  //   updateCartCount();
 
-    // Listen for custom "cartUpdated" events
-    const handleCartUpdate = () => updateCartCount();
-    window.addEventListener("cartUpdated", handleCartUpdate);
+  //   // Listen for custom "cartUpdated" events
+  //   const handleCartUpdate = () => updateCartCount();
+  //   window.addEventListener("cartUpdated", handleCartUpdate);
 
-    return () => {
-      window.removeEventListener("cartUpdated", handleCartUpdate);
-    };
-  }, []);
+  //   return () => {
+  //     window.removeEventListener("cartUpdated", handleCartUpdate);
+  //   };
+  // }, []);
 
   const handleSearch = (
     e: React.FormEvent<HTMLFormElement> | React.MouseEvent<HTMLButtonElement>
@@ -75,7 +94,7 @@ const Header = () => {
               <Button
                 size="icon"
                 variant="ghost"
-                className="md:hidden"
+                className=""
                 onClick={() => setIsMenuOpen(true)}
               >
                 <Menu className="h-5 w-5" />

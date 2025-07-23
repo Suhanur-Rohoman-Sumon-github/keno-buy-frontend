@@ -1,5 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import { useState } from "react";
+
+import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,43 +13,79 @@ import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, CreditCard, Truck, MapPin, Phone } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useGetCart } from "@/hooks/cart.hook"; // 🔥 Cart API hook
+import axios from "axios";
+import { useGetSingleProduct } from "@/hooks/product.hook";
+
+interface CartItem {
+  id: string;
+  name: string;
+  price: number;
+  quantity: number;
+  image: string;
+}
 
 const Checkout = () => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   const [paymentMethod, setPaymentMethod] = useState("cod");
   const [isProcessing, setIsProcessing] = useState(false);
+  const [checkoutItems, setCheckoutItems] = useState<CartItem[]>([]);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
 
+  // Delivery form
   const [formData, setFormData] = useState({
     firstName: "",
-    email: "",
     phone: "",
     address: "",
     district: "",
-    postalCode: "",
     notes: "",
   });
 
-  const cartItems = [
-    {
-      id: "1",
-      name: "প্রিমিয়াম আতর কালেকশন ৩ পিস সেট",
-      price: 975,
-      originalPrice: 1950,
-      quantity: 2,
-      image:
-        "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=100&h=100&fit=crop",
-    },
-    {
-      id: "2",
-      name: "ক্লাসিক সাদা পাঞ্জাবি",
-      price: 1200,
-      originalPrice: 1500,
-      quantity: 1,
-      image:
-        "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=100&h=100&fit=crop",
-    },
-  ];
+  // Get productId from query params
+  const productId = searchParams.get("productId");
 
-  const subtotal = cartItems.reduce(
+  // Fetch userEmail from localStorage
+  useEffect(() => {
+    const email = localStorage.getItem("userEmail");
+    setUserEmail(email);
+  }, []);
+
+  // Fetch single product if productId exists
+  const { data: singleProduct } = useGetSingleProduct(productId || "");
+
+  // Fetch cart items if no productId
+  const { data: cartData, isLoading: cartLoading } = useGetCart(
+    userEmail || ""
+  );
+  useEffect(() => {
+    if (productId && singleProduct) {
+      // 🔥 Show only the single product details (skip cart)
+      setCheckoutItems([
+        {
+          id: singleProduct._id,
+          name: singleProduct.name,
+          price: singleProduct.price,
+          quantity: 1, // Default to 1 for direct checkout
+          image: singleProduct.image,
+        },
+      ]);
+    } else if (!productId && cartData) {
+      // 🛒 Show cart items
+      setCheckoutItems(
+        cartData.items.map((item: any) => ({
+          id: item.product._id,
+          name: item.product.name,
+          price: item.product.price,
+          quantity: item.quantity,
+          image: item.product.image,
+        }))
+      );
+    }
+  }, [productId, singleProduct, cartData]);
+
+  const subtotal = checkoutItems.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0
   );
@@ -65,11 +104,31 @@ const Checkout = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsProcessing(true);
-    setTimeout(() => {
-      window.location.href = "/order-success";
+
+    try {
+      // 🛒 Prepare order payload
+      const orderPayload = {
+        userEmail,
+        items: checkoutItems,
+        totalAmount: total,
+        deliveryDetails: formData,
+        paymentMethod,
+      };
+
+      // 🚀 Send order request
+      await axios.post("/api/orders", orderPayload);
+
+      router.push("/order-success");
+    } catch (error) {
+      console.error("Order failed", error);
+    } finally {
       setIsProcessing(false);
-    }, 2000);
+    }
   };
+
+  if (cartLoading && !productId) {
+    return <div className="text-center p-4">লোড হচ্ছে...</div>;
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -108,6 +167,7 @@ const Checkout = () => {
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-4">
+                  {/* Form fields */}
                   <div className="space-y-2">
                     <Label htmlFor="firstName">আপনার নাম *</Label>
                     <Input
@@ -148,7 +208,7 @@ const Checkout = () => {
                     />
                   </div>
 
-                  {/* Dropdown with Districts */}
+                  {/* District dropdown */}
                   <div className="space-y-2">
                     <Label htmlFor="district">জেলা নির্বাচন করুন *</Label>
                     <select
@@ -164,68 +224,13 @@ const Checkout = () => {
                       <option value="">-- জেলা নির্বাচন করুন --</option>
                       {[
                         "ঢাকা",
-                        "ফরিদপুর",
-                        "গাজীপুর",
-                        "গোপালগঞ্জ",
-                        "জামালপুর",
-                        "কিশোরগঞ্জ",
-                        "মাদারীপুর",
-                        "মানিকগঞ্জ",
-                        "মুন্সিগঞ্জ",
-                        "ময়মনসিংহ",
-                        "নারায়ণগঞ্জ",
-                        "নরসিংদী",
-                        "নেত্রকোনা",
-                        "রাজবাড়ী",
-                        "শরীয়তপুর",
-                        "টাঙ্গাইল",
-                        "বগুড়া",
-                        "চাঁপাইনবাবগঞ্জ",
-                        "জয়পুরহাট",
-                        "নওগাঁ",
-                        "নাটোর",
-                        "পাবনা",
-                        "রাজশাহী",
-                        "সিরাজগঞ্জ",
-                        "দিনাজপুর",
-                        "গাইবান্ধা",
-                        "কুড়িগ্রাম",
-                        "লালমনিরহাট",
-                        "নীলফামারী",
-                        "পঞ্চগড়",
-                        "রংপুর",
-                        "ঠাকুরগাঁও",
-                        "বরগুনা",
-                        "বরিশাল",
-                        "ভোলা",
-                        "ঝালকাঠি",
-                        "পটুয়াখালী",
-                        "পিরোজপুর",
-                        "বান্দরবান",
-                        "ব্রাহ্মণবাড়িয়া",
-                        "চাঁদপুর",
                         "চট্টগ্রাম",
-                        "কুমিল্লা",
-                        "কক্সবাজার",
-                        "ফেনী",
-                        "খাগড়াছড়ি",
-                        "লক্ষ্মীপুর",
-                        "নোয়াখালী",
-                        "রাঙ্গামাটি",
-                        "হবিগঞ্জ",
-                        "মৌলভীবাজার",
-                        "সুনামগঞ্জ",
-                        "সিলেট",
-                        "বাগেরহাট",
-                        "চুয়াডাঙ্গা",
-                        "যশোর",
-                        "ঝিনাইদহ",
+                        "রাজশাহী",
                         "খুলনা",
-                        "কুষ্টিয়া",
-                        "মাগুরা",
-                        "মেহেরপুর",
-                        "নড়াইল",
-                        "সাতক্ষীরা",
+                        "বরিশাল",
+                        "সিলেট",
+                        "রংপুর",
+                        "ময়মনসিংহ",
                       ].map((district) => (
                         <option key={district} value={district}>
                           {district}
@@ -287,34 +292,32 @@ const Checkout = () => {
                 <CardTitle>অর্ডার সারাংশ</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="space-y-4">
-                  {cartItems.map((item) => (
-                    <div key={item.id} className="flex gap-3">
-                      <div className="w-16 h-16 flex-shrink-0">
-                        <Image
-                          height={64}
-                          width={64}
-                          src={item.image}
-                          alt={item.name}
-                          className="w-full h-full object-cover rounded-lg"
-                        />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-sm line-clamp-2">
-                          {item.name}
-                        </h4>
-                        <div className="flex items-center justify-between mt-1">
-                          <span className="text-sm text-muted-foreground">
-                            পরিমাণ: {item.quantity}
-                          </span>
-                          <span className="font-medium">
-                            ৳{item.price * item.quantity}
-                          </span>
-                        </div>
+                {checkoutItems.map((item) => (
+                  <div key={item.id} className="flex gap-3">
+                    <div className="w-16 h-16 flex-shrink-0">
+                      <Image
+                        height={64}
+                        width={64}
+                        src={item.image}
+                        alt={item.name}
+                        className="w-full h-full object-cover rounded-lg"
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-medium text-sm line-clamp-2">
+                        {item.name}
+                      </h4>
+                      <div className="flex items-center justify-between mt-1">
+                        <span className="text-sm text-muted-foreground">
+                          পরিমাণ: {item.quantity}
+                        </span>
+                        <span className="font-medium">
+                          ৳{item.price * item.quantity}
+                        </span>
                       </div>
                     </div>
-                  ))}
-                </div>
+                  </div>
+                ))}
 
                 <Separator />
 
@@ -346,21 +349,6 @@ const Checkout = () => {
                     ? "প্রসেসিং..."
                     : `অর্ডার নিশ্চিত করুন - ৳${total}`}
                 </Button>
-
-                <div className="text-sm text-muted-foreground mt-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span>✓</span>
-                    <span>নিরাপদ চেকআউট প্রসেস</span>
-                  </div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <span>✓</span>
-                    <span>৭ দিনের মধ্যে ফ্রি রিটার্ন</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span>✓</span>
-                    <span>২৪/৭ গ্রাহক সহায়তা</span>
-                  </div>
-                </div>
               </CardContent>
             </Card>
           </div>

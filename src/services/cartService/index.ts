@@ -4,9 +4,9 @@
 import axiosInstance from "@/lib/AxiosInostance";
 
 // ✅ Add product to cart
-export const addToCart = async (userId: string, productId: string, quantity: number = 1) => {
+export const addToCart = async (userEmail: string, productId: string, quantity: number = 1) => {
   try {
-    const { data } = await axiosInstance.post(`/cart/${userId}`, {
+    const { data } = await axiosInstance.post(`/cart/${userEmail}`, {
       productId,
       quantity,
     });
@@ -18,9 +18,10 @@ export const addToCart = async (userId: string, productId: string, quantity: num
 
 // ✅ Get user's cart
 export const getCart = async (userId: string) => {
+  
   try {
     const { data } = await axiosInstance.get(`/cart/${userId}`);
-    return data;
+    return data?.data;
   } catch (error: any) {
     throw new Error(error.response?.data?.message || "Failed to fetch cart");
   }

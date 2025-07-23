@@ -110,20 +110,15 @@ export type Category = {
 
 
 export type Product = {
-  _id:string
-  Id: string;
-  quantity: number;
-  id: string;
-  name: string;
-  images:string[]
-  title:string
-  description:string
-  price:string
-  numReviews:number
-  categoryProps:string
-  category:string
-  subCategory:string
-  sellprice:string ;
+  _id: string;
+   name: string;
+  price: number;
+  originalPrice?: number;
+  image: string;
+  discount?: number;
+  rating: number;
+  reviews: number;
+  inStock: boolean;
 };
 
 export type Order = {
