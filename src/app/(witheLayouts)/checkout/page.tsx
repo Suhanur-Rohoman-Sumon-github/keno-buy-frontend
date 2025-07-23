@@ -44,7 +44,8 @@ const Checkout = () => {
   });
 
   // Get productId from query params
-  const productId = searchParams.get("productId");
+  const params = new URLSearchParams(window.location.search);
+  const productId = params.get("productId");
 
   // Fetch userEmail from localStorage
   useEffect(() => {
