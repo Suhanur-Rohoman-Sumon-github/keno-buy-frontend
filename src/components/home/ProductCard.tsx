@@ -15,7 +15,7 @@ interface ProductCardProps {
   name: string;
   price: number;
   originalPrice?: number;
-  image: string;
+  images: string[];
   discount?: number;
   rating: number;
   reviews: number;
@@ -25,10 +25,10 @@ interface ProductCardProps {
 
 const ProductCard = ({
   _id,
-  name,
+  name: Title,
   price,
   originalPrice,
-  image,
+  images,
   discount,
   rating,
   reviews,
@@ -83,8 +83,8 @@ const ProductCard = ({
             <Image
               height={500}
               width={500}
-              src={image}
-              alt={name}
+              src={images[0]}
+              alt={Title}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
 
@@ -127,7 +127,7 @@ const ProductCard = ({
             {/* Product Name */}
             <Link href={`/product/${category}/${_id}`}>
               <h3 className="font-medium text-foreground mb-2 truncate group-hover:text-primary text-xs transition-colors">
-                {name}
+                {Title}
               </h3>
             </Link>
 

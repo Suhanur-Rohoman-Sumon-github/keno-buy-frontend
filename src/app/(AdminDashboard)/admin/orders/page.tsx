@@ -66,9 +66,14 @@ const OrdersManagement = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [paymentFilter, setPaymentFilter] = useState("all");
 
-  const { data: initialOrders, isLoading } = useGetAllOrderQuery();
+  const { data, isLoading } = useGetAllOrderQuery();
+  const ordersArray = Array.isArray(data) ? data : [];
 
-  const mappedOrders = initialOrders?.map((o: any) => {
+  if (isLoading) {
+    return <div>loading...</div>;
+  }
+
+  const mappedOrders = ordersArray?.map((o: any) => {
     return {
       id: o._id,
       firstName: o.firstName,
@@ -93,7 +98,7 @@ const OrdersManagement = () => {
     return <div>Loading...</div>;
   }
 
-  console.log("Initial Orders:", initialOrders);
+ 
 
   const getStatusColor = (status: Order["status"]) => {
     switch (status) {
@@ -361,7 +366,7 @@ const OrdersManagement = () => {
       {/* Orders Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Orders ({initialOrders?.length})</CardTitle>
+          <CardTitle>Orders ({ordersArray?.length})</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
@@ -378,7 +383,7 @@ const OrdersManagement = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {mappedOrders?.map((order:any) => (
+              {mappedOrders?.map((order: any) => (
                 <TableRow key={order.id}>
                   <TableCell className="font-medium">{order.id}</TableCell>
                   <TableCell>

@@ -114,7 +114,7 @@ export type Product = {
    name: string;
   price: number;
   originalPrice?: number;
-  image: string;
+  images: string[];
   discount?: number;
   rating: number;
   reviews: number;

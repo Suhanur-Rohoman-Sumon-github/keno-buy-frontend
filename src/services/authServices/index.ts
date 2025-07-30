@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 
 import { cookies } from "next/headers";
@@ -110,5 +111,14 @@ export const getNewAccessToken = async () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     throw new Error(error.response?.data?.message || error.message);
+  }
+};
+
+export const getAdminData = async () => {
+  try {
+    const { data } = await axiosInstance.get(`/auth/admin`);
+    return data.data;
+  } catch (error: any) {
+    throw new Error(error.response?.data?.message || "Failed to fetch favorite products");
   }
 };

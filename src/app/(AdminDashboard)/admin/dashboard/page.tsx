@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+"use client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,13 +14,27 @@ import {
   Eye,
   BarChart3,
 } from "lucide-react";
+import { useGetAdminDataQuery } from "@/hooks/auth.hook";
+import Link from "next/link";
 
 const AdminDashboard = () => {
+  const { data: adminData, isLoading } = useGetAdminDataQuery();
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  const summary = adminData?.summary || {};
+  const recentOrders = adminData?.recentOrders || [];
+  const lowStockProducts = adminData?.lowStockProducts || [];
+
+  console.log("Admin Data:", adminData);
+
   // Sample data for dashboard
   const stats = [
     {
       title: "Total Revenue",
-      value: "৳2,45,350",
+      value: `${summary?.totalRevenue || "0"} USD`,
       change: "+12.5%",
       trend: "up",
       icon: DollarSign,
@@ -26,7 +42,7 @@ const AdminDashboard = () => {
     },
     {
       title: "Total Orders",
-      value: "1,847",
+      value: `${summary?.totalOrders || "0"}`,
       change: "+8.2%",
       trend: "up",
       icon: ShoppingCart,
@@ -34,7 +50,7 @@ const AdminDashboard = () => {
     },
     {
       title: "Total Products",
-      value: "324",
+      value: `${summary?.totalProducts || "0"}`,
       change: "+2.1%",
       trend: "up",
       icon: Package,
@@ -42,80 +58,11 @@ const AdminDashboard = () => {
     },
     {
       title: "Active Customers",
-      value: "892",
+      value: `${summary?.activeCustomers || "0"}`,
       change: "-1.5%",
       trend: "down",
       icon: Users,
       color: "text-warning",
-    },
-  ];
-
-  const lowStockProducts = [
-    {
-      id: 1,
-      name: "Premium Attar Collection",
-      currentStock: 3,
-      minStock: 10,
-      category: "Attar",
-    },
-    {
-      id: 2,
-      name: "Cotton Panjabi - White",
-      currentStock: 2,
-      minStock: 15,
-      category: "Panjabi",
-    },
-    {
-      id: 3,
-      name: "Prayer Cap - Black",
-      currentStock: 1,
-      minStock: 20,
-      category: "Tupi",
-    },
-    {
-      id: 4,
-      name: "Organic Honey 500g",
-      currentStock: 5,
-      minStock: 12,
-      category: "Natural Foods",
-    },
-    {
-      id: 5,
-      name: "Sports Sneakers - Blue",
-      currentStock: 4,
-      minStock: 8,
-      category: "Sneakers",
-    },
-  ];
-
-  const recentOrders = [
-    {
-      id: "#BS001",
-      customer: "Ahmed Rahman",
-      amount: "৳1,250",
-      status: "Completed",
-      time: "2 hours ago",
-    },
-    {
-      id: "#BS002",
-      customer: "Fatima Khan",
-      amount: "৳850",
-      status: "Processing",
-      time: "4 hours ago",
-    },
-    {
-      id: "#BS003",
-      customer: "Mohammad Ali",
-      amount: "৳2,100",
-      status: "Pending",
-      time: "6 hours ago",
-    },
-    {
-      id: "#BS004",
-      customer: "Ayesha Begum",
-      amount: "৳650",
-      status: "Completed",
-      time: "8 hours ago",
     },
   ];
 
@@ -205,14 +152,14 @@ const AdminDashboard = () => {
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            {lowStockProducts.map((product) => (
+            {lowStockProducts.map((product: any) => (
               <div
                 key={product.id}
                 className="flex items-center justify-between p-4 bg-card/50 rounded-lg border border-destructive/20"
               >
                 <div className="flex-1">
                   <h4 className="font-medium text-foreground">
-                    {product.name}
+                    {product.Title}
                   </h4>
                   <p className="text-sm text-muted-foreground">
                     {product.category}
@@ -221,10 +168,7 @@ const AdminDashboard = () => {
                 <div className="flex items-center gap-3">
                   <div className="text-right">
                     <div className="text-sm font-medium">
-                      Stock: {product.currentStock}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      Min: {product.minStock}
+                      Stock: {product.Stock}
                     </div>
                   </div>
                   <Badge
@@ -239,16 +183,15 @@ const AdminDashboard = () => {
                       ? "Low"
                       : "Normal"}
                   </Badge>
-                  <Button size="sm" variant="outline">
-                    <Eye className="h-4 w-4" />
-                  </Button>
                 </div>
               </div>
             ))}
-            <Button className="w-full" variant="outline">
-              <Package className="h-4 w-4 mr-2" />
-              Manage Inventory
-            </Button>
+            <Link href="/admin/products">
+              <Button className="w-full" variant="outline">
+                <Package className="h-4 w-4 mr-2" />
+                Manage Inventory
+              </Button>
+            </Link>
           </CardContent>
         </Card>
 
@@ -257,14 +200,16 @@ const AdminDashboard = () => {
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg">Recent Orders</CardTitle>
-              <Button variant="outline" size="sm">
-                <BarChart3 className="h-4 w-4 mr-2" />
-                View All
-              </Button>
+              <Link href="/admin/orders">
+                <Button variant="outline" size="sm">
+                  <Eye className="h-4 w-4 mr-2" />
+                  View All
+                </Button>
+              </Link>
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            {recentOrders.map((order, index) => (
+            {recentOrders.map((order: any, index: number) => (
               <div
                 key={index}
                 className="flex items-center justify-between p-4 bg-card/50 rounded-lg"
@@ -272,55 +217,32 @@ const AdminDashboard = () => {
                 <div>
                   <h4 className="font-medium text-foreground">{order.id}</h4>
                   <p className="text-sm text-muted-foreground">
-                    {order.customer}
+                    {order.firstName}
                   </p>
-                  <p className="text-xs text-muted-foreground">{order.time}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {order.createdAt}
+                  </p>
                 </div>
                 <div className="text-right flex items-center gap-3">
                   <div>
                     <div className="font-semibold text-foreground">
-                      {order.amount}
+                      $
+                      {order.products.reduce(
+                        (sum: number, item: any) =>
+                          sum + item.quantity * item.product.price,
+                        0
+                      )}
                     </div>
                     <Badge className={getOrderStatusColor(order.status)}>
                       {order.status}
                     </Badge>
                   </div>
-                  <Button size="sm" variant="ghost">
-                    <Eye className="h-4 w-4" />
-                  </Button>
                 </div>
               </div>
             ))}
           </CardContent>
         </Card>
       </div>
-
-      {/* Quick Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Button className="h-16 flex-col gap-2" variant="outline">
-              <Package className="h-6 w-6" />
-              Add Product
-            </Button>
-            <Button className="h-16 flex-col gap-2" variant="outline">
-              <ShoppingCart className="h-6 w-6" />
-              View Orders
-            </Button>
-            <Button className="h-16 flex-col gap-2" variant="outline">
-              <Users className="h-6 w-6" />
-              Customers
-            </Button>
-            <Button className="h-16 flex-col gap-2" variant="outline">
-              <BarChart3 className="h-6 w-6" />
-              Reports
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 };

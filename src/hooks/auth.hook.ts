@@ -1,8 +1,8 @@
 import { FieldValues } from "react-hook-form";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { loginUser, registerUser } from "@/services/authServices";
+import { getAdminData, loginUser, registerUser } from "@/services/authServices";
 export const useUserRegistrationsMutation = () => {
  
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -38,6 +38,12 @@ export const useUserLoginMutations = () => {
     },
   });
 };
+
+export const useGetAdminDataQuery = () =>
+  useQuery({
+    queryKey: ["orders"],
+    queryFn: () => getAdminData(),
+  });
 
 // Assuming you have this service function
 
