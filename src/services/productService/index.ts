@@ -2,15 +2,31 @@
 "use server";
 
 import axiosInstance from "@/lib/AxiosInostance";
+import axios from "axios";
 
 // ✅ Get all products (supports search/filter/pagination)
-export const getAllProducts = async (query?: Record<string, string>) => {
+export const getALlProducts = async (queryParams: {
+  
+  category?: string;
+ categoryId?:string
+sort?: string | "";
+  searchTerm?: string | "";
+}) => {
   try {
-    const { data } = await axiosInstance.get("/products");
-    
-    return data.data || [];
+    const { category, sort,searchTerm,categoryId } =
+      queryParams;
+
+    const query = new URLSearchParams();
+    if (category) query.append("category", category);
+    if (categoryId) query.append("categoryId", categoryId);
+    if (sort) query.append("sort", sort);
+    if (searchTerm) query.append("searchTerm", searchTerm);
+
+    const { data } = await axiosInstance.get(`/products?${query?.toString()}`);
+
+    return data;
   } catch (error: any) {
-    throw new Error(error.response || "Failed to fetch products");
+    throw new Error(error.message);
   }
 };
 
@@ -57,14 +73,25 @@ export const getFavoriteProducts = async (userId: string) => {
 };
 
 // ✅ Create product (Admin)
-export const createProduct = async (payload: FormData) => {
+export const createProduct = async (productData: any) => {
+ 
   try {
-    const { data } = await axiosInstance.post("/products", payload, {
-      headers: { "Content-Type": "multipart/form-data" },
+    const { data } = await axiosInstance.post('/products', productData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
     });
-    return data;
+    return data.data;
   } catch (error: any) {
-    throw new Error(error.response?.data?.message || "Failed to create product");
+    if (axios.isAxiosError(error)) {
+      console.error("Axios error response:", error.response?.data);
+      const message = error.response?.data?.message || "Failed to create product (server error)";
+      throw new Error(message);
+    }
+
+    // Catch any other unexpected error
+    console.error("Unexpected error:", error);
+    throw new Error("An unexpected error occurred.");
   }
 };
 

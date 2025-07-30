@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +17,7 @@ import Link from "next/link";
 import { useGetCart } from "@/hooks/cart.hook"; // 🔥 Cart API hook
 import axios from "axios";
 import { useGetSingleProduct } from "@/hooks/product.hook";
+import { usePlaceOrderMutation } from "@/hooks/order.hook";
 
 interface CartItem {
   id: string;
@@ -27,7 +29,7 @@ interface CartItem {
 
 const Checkout = () => {
   const router = useRouter();
-
+  const { register, handleSubmit } = useForm();
   const [paymentMethod, setPaymentMethod] = useState("cod");
   const [isProcessing, setIsProcessing] = useState(false);
   const [checkoutItems, setCheckoutItems] = useState<CartItem[]>([]);
@@ -51,14 +53,16 @@ const Checkout = () => {
     setUserEmail(email);
   }, []);
 
- useEffect(() => {
-   const searchParams = new URLSearchParams(window.location.search);
-   const productIdPeram = searchParams.get("productId");
-   setProductId(productIdPeram);
- }, []);
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const productIdPeram = searchParams.get("productId");
+    setProductId(productIdPeram);
+  }, []);
 
   // Fetch single product if productId exists
   const { data: singleProduct } = useGetSingleProduct(productId || "");
+
+  const { mutate: crateOrder } = usePlaceOrderMutation();
 
   // Fetch cart items if no productId
   const { data: cartData, isLoading: cartLoading } = useGetCart(
@@ -106,24 +110,30 @@ const Checkout = () => {
     });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (data) => {
     setIsProcessing(true);
 
     try {
-      // 🛒 Prepare order payload
       const orderPayload = {
-        userEmail,
+        products: [
+          {
+            product: "6880d9a72b13a07f13485d23",
+            quantity: 2,
+          },
+        ],
+
+        firstName: data.firstName,
         items: checkoutItems,
         totalAmount: total,
-        deliveryDetails: formData,
+        phone: data.phone,
+        address: data.address,
+        district: data.district,
+        notes: data.notes,
         paymentMethod,
       };
 
-      // 🚀 Send order request
-      await axios.post("/api/orders", orderPayload);
-
-      router.push("/order-success");
+      crateOrder(orderPayload);
+      router.push("/OrderSuccess");
     } catch (error) {
       console.error("Order failed", error);
     } finally {
@@ -162,200 +172,148 @@ const Checkout = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Checkout Form */}
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MapPin className="w-5 h-5" />
-                  ডেলিভারি তথ্য
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  {/* Form fields */}
-                  <div className="space-y-2">
-                    <Label htmlFor="firstName">আপনার নাম *</Label>
-                    <Input
-                      id="firstName"
-                      name="firstName"
-                      value={formData.firstName}
-                      onChange={handleInputChange}
-                      required
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="phone">মোবাইল নাম্বার *</Label>
-                    <div className="relative">
-                      <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Checkout Form */}
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <MapPin className="w-5 h-5" />
+                    ডেলিভারি তথ্য
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <form
+                    id="checkoutForm"
+                    onSubmit={handleSubmit(onSubmit)}
+                    className="space-y-4"
+                  >
+                    <div className="space-y-2">
+                      <Label htmlFor="firstName">আপনার নাম *</Label>
                       <Input
-                        id="phone"
-                        name="phone"
-                        type="tel"
-                        className="pl-10"
-                        placeholder="+৮৮০ ১২৩৪ ৫৬৭৮৯০"
-                        value={formData.phone}
-                        onChange={handleInputChange}
-                        required
+                        id="firstName"
+                        {...register("firstName", { required: true })}
                       />
                     </div>
-                  </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="address">সম্পূর্ণ ঠিকানা *</Label>
-                    <Textarea
-                      id="address"
-                      name="address"
-                      placeholder="বাড়ি/বিল্ডিং, রাস্তা, এলাকা"
-                      value={formData.address}
-                      onChange={handleInputChange}
-                      required
-                    />
-                  </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="phone">মোবাইল নাম্বার *</Label>
+                      <div className="relative">
+                        <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                        <Input
+                          id="phone"
+                          type="tel"
+                          className="pl-10"
+                          placeholder="+৮৮০ ১২৩৪ ৫৬৭৮৯০"
+                          {...register("phone", { required: true })}
+                        />
+                      </div>
+                    </div>
 
-                  {/* District dropdown */}
-                  <div className="space-y-2">
-                    <Label htmlFor="district">জেলা নির্বাচন করুন *</Label>
-                    <select
-                      id="district"
-                      name="district"
-                      value={formData.district}
-                      onChange={(e) =>
-                        setFormData({ ...formData, district: e.target.value })
-                      }
-                      required
-                      className="w-full border rounded-md px-4 py-2 text-sm"
-                    >
-                      <option value="">-- জেলা নির্বাচন করুন --</option>
-                      {[
-                        "ঢাকা",
-                        "চট্টগ্রাম",
-                        "রাজশাহী",
-                        "খুলনা",
-                        "বরিশাল",
-                        "সিলেট",
-                        "রংপুর",
-                        "ময়মনসিংহ",
-                      ].map((district) => (
-                        <option key={district} value={district}>
-                          {district}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="address">সম্পূর্ণ ঠিকানা *</Label>
+                      <Textarea
+                        id="address"
+                        placeholder="বাড়ি/বিল্ডিং, রাস্তা, এলাকা"
+                        {...register("address", { required: true })}
+                      />
+                    </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="notes">অতিরিক্ত নির্দেশনা (ঐচ্ছিক)</Label>
-                    <Textarea
-                      id="notes"
-                      name="notes"
-                      placeholder="ডেলিভারির জন্য কোনো বিশেষ নির্দেশনা থাকলে লিখুন"
-                      value={formData.notes}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                </form>
-              </CardContent>
-            </Card>
-
-            {/* Payment Method */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <CreditCard className="w-5 h-5" />
-                  পেমেন্ট মাধ্যম
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <RadioGroup
-                  value={paymentMethod}
-                  onValueChange={setPaymentMethod}
-                >
-                  <div className="flex items-center space-x-2 p-4 border rounded-lg">
-                    <RadioGroupItem value="cod" id="cod" />
-                    <Label htmlFor="cod" className="flex-1 cursor-pointer">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="font-medium">ক্যাশ অন ডেলিভারি</div>
-                          <div className="text-sm text-muted-foreground">
-                            পণ্য গ্রহণের সময় টাকা দিন
-                          </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="district">জেলা নির্বাচন করুন *</Label>
+                      <select
+                        id="district"
+                        {...register("district", { required: true })}
+                        className="w-full border rounded-md px-4 py-2 text-sm"
+                      >
+                        <option value="">-- জেলা নির্বাচন করুন --</option>
+                        {[
+                          "ঢাকা",
+                          "চট্টগ্রাম",
+                          "রাজশাহী",
+                          "খুলনা",
+                          "বরিশাল",
+                          "সিলেট",
+                          "রংপুর",
+                          "ময়মনসিংহ",
+                        ].map((district) => (
+                          <option key={district} value={district}>
+                            {district}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </form>
+                </CardContent>
+              </Card>
+            </div>
+            {/* Order Summary */}
+            <div>
+              <Card className="sticky top-4">
+                <CardHeader>
+                  <CardTitle>অর্ডার সারাংশ</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {checkoutItems.map((item) => (
+                    <div key={item.id} className="flex gap-3">
+                      <div className="w-16 h-16 flex-shrink-0">
+                        <Image
+                          height={64}
+                          width={64}
+                          src={item.image}
+                          alt={item.name}
+                          className="w-full h-full object-cover rounded-lg"
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-medium text-sm line-clamp-2">
+                          {item.name}
+                        </h4>
+                        <div className="flex items-center justify-between mt-1">
+                          <span className="text-sm text-muted-foreground">
+                            পরিমাণ: {item.quantity}
+                          </span>
+                          <span className="font-medium">
+                            ৳{item.price * item.quantity}
+                          </span>
                         </div>
-                        <Truck className="w-5 h-5 text-muted-foreground" />
-                      </div>
-                    </Label>
-                  </div>
-                </RadioGroup>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Order Summary */}
-          <div>
-            <Card className="sticky top-4">
-              <CardHeader>
-                <CardTitle>অর্ডার সারাংশ</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {checkoutItems.map((item) => (
-                  <div key={item.id} className="flex gap-3">
-                    <div className="w-16 h-16 flex-shrink-0">
-                      <Image
-                        height={64}
-                        width={64}
-                        src={item.image}
-                        alt={item.name}
-                        className="w-full h-full object-cover rounded-lg"
-                      />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-medium text-sm line-clamp-2">
-                        {item.name}
-                      </h4>
-                      <div className="flex items-center justify-between mt-1">
-                        <span className="text-sm text-muted-foreground">
-                          পরিমাণ: {item.quantity}
-                        </span>
-                        <span className="font-medium">
-                          ৳{item.price * item.quantity}
-                        </span>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
 
-                <Separator />
-
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span>সাবটোটাল</span>
-                    <span>৳{subtotal}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>শিপিং</span>
-                    <span className={shipping === 0 ? "text-green-600" : ""}>
-                      {shipping === 0 ? "ফ্রি" : `৳${shipping}`}
-                    </span>
-                  </div>
                   <Separator />
-                  <div className="flex justify-between text-lg font-bold">
-                    <span>মোট</span>
-                    <span>৳{total}</span>
-                  </div>
-                </div>
 
-                <Button
-                  onClick={handleSubmit}
-                  className="w-full mt-6"
-                  size="lg"
-                  disabled={isProcessing}
-                >
-                  {isProcessing
-                    ? "প্রসেসিং..."
-                    : `অর্ডার নিশ্চিত করুন - ৳${total}`}
-                </Button>
-              </CardContent>
-            </Card>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span>সাবটোটাল</span>
+                      <span>৳{subtotal}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>শিপিং</span>
+                      <span className={shipping === 0 ? "text-green-600" : ""}>
+                        {shipping === 0 ? "ফ্রি" : `৳${shipping}`}
+                      </span>
+                    </div>
+                    <Separator />
+                    <div className="flex justify-between text-lg font-bold">
+                      <span>মোট</span>
+                      <span>৳{total}</span>
+                    </div>
+                  </div>
+
+                  <Button
+                    form="checkoutForm"
+                    className="w-full mt-6"
+                    size="lg"
+                    disabled={isProcessing}
+                  >
+                    {isProcessing
+                      ? "প্রসেসিং..."
+                      : `অর্ডার নিশ্চিত করুন - ৳${total}`}
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </div>
       </div>

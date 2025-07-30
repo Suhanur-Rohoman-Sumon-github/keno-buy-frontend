@@ -1,0 +1,51 @@
+import { Controller, useFormContext } from "react-hook-form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+
+interface IProps {
+  options: { key: string; label: string }[];
+  name: string;
+  label: string;
+  disabled?: boolean;
+}
+
+export default function DSelect({ options, name, label, disabled }: IProps) {
+  const { control } = useFormContext();
+
+  return (
+    <div className="space-y-2">
+      <label htmlFor={name} className="block text-sm font-medium text-gray-700">
+        {label}
+      </label>
+
+      <Controller
+        name={name}
+        control={control}
+        render={({ field }) => (
+          <Select
+            value={field.value}
+            onValueChange={(value) => field.onChange(value)}
+            disabled={disabled}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder={`Select ${label}`} />
+            </SelectTrigger>
+
+            <SelectContent className="bg-white shadow-lg rounded-md mt-1">
+              {options.map((option) => (
+                <SelectItem key={option.key} value={option.key}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+      />
+    </div>
+  );
+}

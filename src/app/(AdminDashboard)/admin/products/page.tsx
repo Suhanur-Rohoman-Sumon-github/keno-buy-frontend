@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -15,21 +16,11 @@ import {
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Search,
   Plus,
@@ -40,10 +31,13 @@ import {
   TrendingDown,
   Eye,
 } from "lucide-react";
+import { useGetAllProductsQuery } from "@/hooks/product.hook";
+import ProductCreateForm from "@/components/admin/ProductCreateForm";
+import UpdateProductForm from "@/components/admin/UpdateProductForm";
 
 interface Product {
-  id: string;
-  name: string;
+  _id: string;
+  Title: string;
   category: string;
   price: number;
   stock: number;
@@ -52,74 +46,41 @@ interface Product {
   image?: string;
 }
 
-const sampleProducts: Product[] = [
-  {
-    id: "1",
-    name: "Premium Cotton T-Shirt",
-    category: "Clothing",
-    price: 29.99,
-    stock: 150,
-    status: "active",
-    sales: 234,
-  },
-  {
-    id: "2",
-    name: "Wireless Headphones",
-    category: "Electronics",
-    price: 99.99,
-    stock: 45,
-    status: "active",
-    sales: 89,
-  },
-  {
-    id: "3",
-    name: "Leather Wallet",
-    category: "Accessories",
-    price: 49.99,
-    stock: 0,
-    status: "inactive",
-    sales: 156,
-  },
-  {
-    id: "4",
-    name: "Smartphone Case",
-    category: "Electronics",
-    price: 19.99,
-    stock: 200,
-    status: "active",
-    sales: 445,
-  },
-  {
-    id: "5",
-    name: "Coffee Mug",
-    category: "Home",
-    price: 14.99,
-    stock: 78,
-    status: "draft",
-    sales: 23,
-  },
-];
-
 const ProductsManagement = () => {
-  const [products, setProducts] = useState<Product[]>(sampleProducts);
-  const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [viewingProduct, setViewingProduct] = useState<Product | null>(null);
 
-  const filteredProducts = products.filter((product) => {
-    const matchesSearch = product.name
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
-    const matchesCategory =
-      selectedCategory === "all" || product.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
+  const [searchInput, setSearchInput] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setSearchTerm(searchInput);
+    }, 2000);
+    return () => clearTimeout(timeout);
+  }, [searchInput]);
 
-  const categories = [
-    "all",
-    ...Array.from(new Set(products.map((p) => p.category))),
-  ];
+  const queryParams = {
+    category: selectedCategory === "all" ? undefined : selectedCategory,
+    searchTerm,
+  };
+
+  const { data: initialProducts, isLoading } = useGetAllProductsQuery(
+    queryParams,
+    { keepPreviousData: true }
+  );
+
+  const filteredProducts = initialProducts || [];
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  // const categories = [
+  //   "all",
+  //   ...Array.from(new Set(filteredProducts.map((p: any) => p.category))),
+  // ];
 
   const getStatusColor = (status: Product["status"]) => {
     switch (status) {
@@ -140,135 +101,9 @@ const ProductsManagement = () => {
     return { color: "text-green-600", label: "In Stock" };
   };
 
-  const handleDeleteProduct = (id: string) => {
-    setProducts(products.filter((p) => p.id !== id));
-  };
-
-  const ProductForm = ({
-    product,
-    onSave,
-    onClose,
-  }: {
-    product?: Product;
-    onSave: (product: Partial<Product>) => void;
-    onClose: () => void;
-  }) => {
-    const [formData, setFormData] = useState({
-      name: product?.name || "",
-      category: product?.category || "",
-      price: product?.price || 0,
-      stock: product?.stock || 0,
-      status: product?.status || ("draft" as Product["status"]),
-    });
-
-    const handleSubmit = (e: React.FormEvent) => {
-      e.preventDefault();
-      onSave(formData);
-      onClose();
-    };
-
-    return (
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>
-            {product ? "Edit Product" : "Add New Product"}
-          </DialogTitle>
-          <DialogDescription>
-            {product
-              ? "Update the product details below."
-              : "Fill in the product information below."}
-          </DialogDescription>
-        </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Product Name</Label>
-            <Input
-              id="name"
-              value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
-              placeholder="Enter product name"
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="category">Category</Label>
-            <Input
-              id="category"
-              value={formData.category}
-              onChange={(e) =>
-                setFormData({ ...formData, category: e.target.value })
-              }
-              placeholder="Enter category"
-              required
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="price">Price ($)</Label>
-              <Input
-                id="price"
-                type="number"
-                step="0.01"
-                value={formData.price}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    price: parseFloat(e.target.value),
-                  })
-                }
-                placeholder="0.00"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="stock">Stock</Label>
-              <Input
-                id="stock"
-                type="number"
-                value={formData.stock}
-                onChange={(e) =>
-                  setFormData({ ...formData, stock: parseInt(e.target.value) })
-                }
-                placeholder="0"
-                required
-              />
-            </div>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="status">Status</Label>
-            <Select
-              value={formData.status}
-              onValueChange={(value: Product["status"]) =>
-                setFormData({ ...formData, status: value })
-              }
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="inactive">Inactive</SelectItem>
-                <SelectItem value="draft">Draft</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose}>
-              Cancel
-            </Button>
-            <Button type="submit">
-              {product ? "Update Product" : "Add Product"}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    );
-  };
-
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Products Management</h1>
@@ -283,21 +118,11 @@ const ProductsManagement = () => {
               Add Product
             </Button>
           </DialogTrigger>
-          <ProductForm
-            onSave={(data) => {
-              const newProduct: Product = {
-                ...data,
-                id: Date.now().toString(),
-                sales: 0,
-              } as Product;
-              setProducts([...products, newProduct]);
-            }}
-            onClose={() => setIsAddProductOpen(false)}
-          />
+          <ProductCreateForm onClose={() => setIsAddProductOpen(false)} />
         </Dialog>
       </div>
 
-      {/* Stats Cards */}
+      {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -307,8 +132,7 @@ const ProductsManagement = () => {
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{products.length}</div>
-            <p className="text-xs text-muted-foreground">+2 new this week</p>
+            <div className="text-2xl font-bold">{filteredProducts.length}</div>
           </CardContent>
         </Card>
         <Card>
@@ -320,16 +144,11 @@ const ProductsManagement = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {products.filter((p) => p.status === "active").length}
+              {
+                filteredProducts.filter((p: any) => p.status === "active")
+                  .length
+              }
             </div>
-            <p className="text-xs text-muted-foreground">
-              {Math.round(
-                (products.filter((p) => p.status === "active").length /
-                  products.length) *
-                  100
-              )}
-              % of total
-            </p>
           </CardContent>
         </Card>
         <Card>
@@ -339,9 +158,8 @@ const ProductsManagement = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {products.filter((p) => p.stock < 20).length}
+              {filteredProducts.filter((p: any) => p.stock < 20).length}
             </div>
-            <p className="text-xs text-muted-foreground">Need restocking</p>
           </CardContent>
         </Card>
         <Card>
@@ -351,11 +169,8 @@ const ProductsManagement = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {products.filter((p) => p.stock === 0).length}
+              {filteredProducts.filter((p: any) => p.stock === 0).length}
             </div>
-            <p className="text-xs text-muted-foreground">
-              Requires immediate attention
-            </p>
           </CardContent>
         </Card>
       </div>
@@ -371,8 +186,8 @@ const ProductsManagement = () => {
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search products..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
                 className="pl-10"
               />
             </div>
@@ -383,13 +198,13 @@ const ProductsManagement = () => {
               <SelectTrigger className="w-full sm:w-[200px]">
                 <SelectValue placeholder="Select category" />
               </SelectTrigger>
-              <SelectContent>
+              {/* <SelectContent>
                 {categories.map((category) => (
                   <SelectItem key={category} value={category}>
                     {category === "all" ? "All Categories" : category}
                   </SelectItem>
                 ))}
-              </SelectContent>
+              </SelectContent> */}
             </Select>
           </div>
         </CardContent>
@@ -414,12 +229,12 @@ const ProductsManagement = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredProducts.map((product) => {
+              {filteredProducts.map((product: Product) => {
                 const stockStatus = getStockStatus(product.stock);
                 return (
-                  <TableRow key={product.id}>
+                  <TableRow key={product._id}>
                     <TableCell className="font-medium">
-                      {product.name}
+                      {product.Title}
                     </TableCell>
                     <TableCell>{product.category}</TableCell>
                     <TableCell>${product.price.toFixed(2)}</TableCell>
@@ -436,40 +251,23 @@ const ProductsManagement = () => {
                     <TableCell>{product.sales} sold</TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <Button variant="ghost" size="sm">
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setEditingProduct(product)}
-                            >
-                              <Edit2 className="h-4 w-4" />
-                            </Button>
-                          </DialogTrigger>
-                          {editingProduct && (
-                            <ProductForm
-                              product={editingProduct}
-                              onSave={(data) => {
-                                setProducts(
-                                  products.map((p) =>
-                                    p.id === editingProduct.id
-                                      ? { ...p, ...data }
-                                      : p
-                                  )
-                                );
-                                setEditingProduct(null);
-                              }}
-                              onClose={() => setEditingProduct(null)}
-                            />
-                          )}
-                        </Dialog>
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleDeleteProduct(product.id)}
+                          onClick={() => setViewingProduct(product)}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setEditingProduct(product)}
+                        >
+                          <Edit2 className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           className="text-red-600 hover:text-red-700"
                         >
                           <Trash2 className="h-4 w-4" />
@@ -483,6 +281,60 @@ const ProductsManagement = () => {
           </Table>
         </CardContent>
       </Card>
+
+      {/* View Product Modal */}
+      <Dialog
+        open={!!viewingProduct}
+        onOpenChange={() => setViewingProduct(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{viewingProduct?.Title}</DialogTitle>
+          </DialogHeader>
+          {viewingProduct && (
+            <div className="space-y-2">
+              <p>
+                <strong>Category:</strong> {viewingProduct.category}
+              </p>
+              <p>
+                <strong>Price:</strong> ${viewingProduct.price}
+              </p>
+              <p>
+                <strong>Stock:</strong> {viewingProduct.stock}
+              </p>
+              <p>
+                <strong>Status:</strong> {viewingProduct.status}
+              </p>
+              <p>
+                <strong>Sales:</strong> {viewingProduct.sales}
+              </p>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Product Modal */}
+      <Dialog
+        open={!!editingProduct}
+        onOpenChange={() => setEditingProduct(null)}
+      >
+        <Dialog
+          open={!!editingProduct}
+          onOpenChange={() => setEditingProduct(null)}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit Product</DialogTitle>
+            </DialogHeader>
+            {editingProduct && (
+              <UpdateProductForm
+                product={editingProduct}
+                onClose={() => setEditingProduct(null)}
+              />
+            )}
+          </DialogContent>
+        </Dialog>
+      </Dialog>
     </div>
   );
 };

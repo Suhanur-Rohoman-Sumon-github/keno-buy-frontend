@@ -41,25 +41,38 @@ const ProductCard = ({
 
   // Function to add product to localStorage
   const handleAddToCart = () => {
-    if (typeof window !== "undefined") {
-      // 🔥 1. Generate random email if not already in localStorage
-      let userEmail = localStorage.getItem("userEmail");
-      if (!userEmail) {
-        const randomEmail = `user${Math.floor(
-          Math.random() * 100000
-        )}@example.com`;
-        localStorage.setItem("userEmail", randomEmail);
-        userEmail = randomEmail;
-        console.log("Generated random email:", randomEmail);
-      }
+    if (typeof window === "undefined") return;
 
-      // ✅ 2. Call API mutation to save cart
-      addTocart({
+    // 1. Get or generate userEmail
+    let userEmail = localStorage.getItem("userEmail");
+    if (!userEmail) {
+      const randomEmail = `user${Math.floor(
+        Math.random() * 100000
+      )}@example.com`;
+      localStorage.setItem("userEmail", randomEmail);
+      userEmail = randomEmail;
+      console.log("Generated random email:", randomEmail);
+    }
+
+    // 2. Call mutation
+    addTocart(
+      {
         userEmail: userEmail,
         productId: _id || "",
-        quantity: 1, // Default quantity to 1
-      });
-    }
+        quantity: 1,
+      },
+      {
+        onSuccess: () => {
+          setAddedToCart(true);
+
+          // 3. Dispatch event for header to refetch cart
+          window.dispatchEvent(new Event("cartUpdated"));
+        },
+        onError: (error) => {
+          console.error("Add to cart failed:", error);
+        },
+      }
+    );
   };
 
   return (

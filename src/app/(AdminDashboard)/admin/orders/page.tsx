@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -37,10 +38,12 @@ import {
   Clock,
   DollarSign,
 } from "lucide-react";
+import { useGetAllOrderQuery, useUpdateOrderStatusMutation } from "@/hooks/order.hook";
 
 interface Order {
+  products: any;
   id: string;
-  customerName: string;
+  firstName: string;
   customerEmail: string;
   items: Array<{
     name: string;
@@ -55,92 +58,42 @@ interface Order {
   updatedAt: string;
 }
 
-const sampleOrders: Order[] = [
-  {
-    id: "ORD-001",
-    customerName: "John Doe",
-    customerEmail: "john@example.com",
-    items: [
-      { name: "Premium Cotton T-Shirt", quantity: 2, price: 29.99 },
-      { name: "Wireless Headphones", quantity: 1, price: 99.99 },
-    ],
-    total: 159.97,
-    status: "delivered",
-    paymentStatus: "paid",
-    shippingAddress: "123 Main St, New York, NY 10001",
-    createdAt: "2024-01-15T10:30:00Z",
-    updatedAt: "2024-01-18T14:20:00Z",
-  },
-  {
-    id: "ORD-002",
-    customerName: "Jane Smith",
-    customerEmail: "jane@example.com",
-    items: [{ name: "Leather Wallet", quantity: 1, price: 49.99 }],
-    total: 49.99,
-    status: "shipped",
-    paymentStatus: "paid",
-    shippingAddress: "456 Oak Ave, Los Angeles, CA 90210",
-    createdAt: "2024-01-16T09:15:00Z",
-    updatedAt: "2024-01-17T11:45:00Z",
-  },
-  {
-    id: "ORD-003",
-    customerName: "Mike Johnson",
-    customerEmail: "mike@example.com",
-    items: [
-      { name: "Smartphone Case", quantity: 3, price: 19.99 },
-      { name: "Coffee Mug", quantity: 2, price: 14.99 },
-    ],
-    total: 89.95,
-    status: "processing",
-    paymentStatus: "paid",
-    shippingAddress: "789 Pine St, Chicago, IL 60601",
-    createdAt: "2024-01-17T16:20:00Z",
-    updatedAt: "2024-01-17T16:20:00Z",
-  },
-  {
-    id: "ORD-004",
-    customerName: "Sarah Wilson",
-    customerEmail: "sarah@example.com",
-    items: [{ name: "Premium Cotton T-Shirt", quantity: 1, price: 29.99 }],
-    total: 29.99,
-    status: "pending",
-    paymentStatus: "pending",
-    shippingAddress: "321 Elm St, Miami, FL 33101",
-    createdAt: "2024-01-18T08:45:00Z",
-    updatedAt: "2024-01-18T08:45:00Z",
-  },
-  {
-    id: "ORD-005",
-    customerName: "David Brown",
-    customerEmail: "david@example.com",
-    items: [{ name: "Wireless Headphones", quantity: 1, price: 99.99 }],
-    total: 99.99,
-    status: "cancelled",
-    paymentStatus: "failed",
-    shippingAddress: "654 Maple Dr, Seattle, WA 98101",
-    createdAt: "2024-01-18T12:30:00Z",
-    updatedAt: "2024-01-18T13:15:00Z",
-  },
-];
+
 
 const OrdersManagement = () => {
-  const [orders, setOrders] = useState<Order[]>(sampleOrders);
+
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [paymentFilter, setPaymentFilter] = useState("all");
 
-  const filteredOrders = orders.filter((order) => {
-    const matchesSearch =
-      order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.customerEmail.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus =
-      statusFilter === "all" || order.status === statusFilter;
-    const matchesPayment =
-      paymentFilter === "all" || order.paymentStatus === paymentFilter;
-    return matchesSearch && matchesStatus && matchesPayment;
+  const { data: initialOrders, isLoading } = useGetAllOrderQuery();
+
+  const mappedOrders = initialOrders?.map((o: any) => {
+    return {
+      id: o._id,
+      firstName: o.firstName,
+      products: o.products.map((p: any) => ({
+        name: p.product?.name || "Unknown",
+        quantity: p.quantity,
+        price: p.product?.price || 0,
+      })),
+      total: o.products.reduce(
+        (sum: number, p: any) => sum + (p.product?.price || 0) * p.quantity,
+        0
+      ),
+      status: o.status,
+      paymentStatus: o.paymentMethod === "cod" ? "pending" : "paid",
+      shippingAddress: `${o.address}, ${o.district}`,
+      createdAt: o.createdAt,
+      updatedAt: o.updatedAt,
+    };
   });
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  console.log("Initial Orders:", initialOrders);
 
   const getStatusColor = (status: Order["status"]) => {
     switch (status) {
@@ -189,129 +142,120 @@ const OrdersManagement = () => {
     }
   };
 
-  const updateOrderStatus = (orderId: string, newStatus: Order["status"]) => {
-    setOrders(
-      orders.map((order) =>
-        order.id === orderId
-          ? { ...order, status: newStatus, updatedAt: new Date().toISOString() }
-          : order
-      )
+
+
+  const OrderDetailsDialog = ({ order }: { order: Order }) => {
+    const updateOrderMutation = useUpdateOrderStatusMutation();
+
+    const handleStatusChange = (value: Order["status"]) => {
+      updateOrderMutation.mutate({
+        orderId: order.id,
+        status: value,
+      });
+    };
+
+    return (
+      <DialogContent className="sm:max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>Order Details - {order.id}</DialogTitle>
+          <DialogDescription>
+            Complete information about this order
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-6">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <h4 className="font-semibold mb-2">Customer Information</h4>
+              <p className="text-sm text-muted-foreground">
+                Name: {order.firstName}
+              </p>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-2">Order Status</h4>
+              <div className="flex items-center gap-2">
+                <Badge className={getStatusColor(order.status)}>
+                  {getStatusIcon(order.status)}
+                </Badge>
+                <Badge className={getStatusColor(order.status)}>
+                  {order.status}
+                </Badge>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h4 className="font-semibold mb-2">Shipping Address</h4>
+            <p className="text-sm text-muted-foreground">
+              {order.shippingAddress}
+            </p>
+          </div>
+
+          <div>
+            <h4 className="font-semibold mb-2">Order Items</h4>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Product</TableHead>
+                  <TableHead>Quantity</TableHead>
+                  <TableHead>Unit Price</TableHead>
+                  <TableHead>Total</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {order?.products?.map((item: any, index: number) => (
+                  <TableRow key={index}>
+                    <TableCell>{item.name}</TableCell>
+                    <TableCell>{item.quantity}</TableCell>
+                    <TableCell>${item?.price?.toFixed(2)}</TableCell>
+                    <TableCell>
+                      ${(item.quantity * item.price).toFixed(2)}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+            <div className="flex justify-end mt-4">
+              <div className="text-right">
+                <p className="text-lg font-semibold">
+                  Total: ${order?.total?.toFixed(2)}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 text-sm text-muted-foreground">
+            <div>
+              <strong>Created:</strong>{" "}
+              {new Date(order.createdAt).toLocaleString()}
+            </div>
+            <div>
+              <strong>Last Updated:</strong>{" "}
+              {new Date(order.updatedAt).toLocaleString()}
+            </div>
+          </div>
+
+          <div>
+            <h4 className="font-semibold mb-2">Update Status</h4>
+            <Select value={order.status} onValueChange={handleStatusChange}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="processing">Processing</SelectItem>
+                <SelectItem value="shipped">Shipped</SelectItem>
+                <SelectItem value="delivered">Delivered</SelectItem>
+                <SelectItem value="cancelled">Cancelled</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </DialogContent>
     );
   };
 
-  const OrderDetailsDialog = ({ order }: { order: Order }) => (
-    <DialogContent className="sm:max-w-2xl">
-      <DialogHeader>
-        <DialogTitle>Order Details - {order.id}</DialogTitle>
-        <DialogDescription>
-          Complete information about this order
-        </DialogDescription>
-      </DialogHeader>
-      <div className="space-y-6">
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <h4 className="font-semibold mb-2">Customer Information</h4>
-            <p className="text-sm text-muted-foreground">
-              Name: {order.customerName}
-            </p>
-            <p className="text-sm text-muted-foreground">
-              Email: {order.customerEmail}
-            </p>
-          </div>
-          <div>
-            <h4 className="font-semibold mb-2">Order Status</h4>
-            <div className="flex items-center gap-2">
-              <Badge className={getStatusColor(order.status)}>
-                {getStatusIcon(order.status)}
-                <span className="ml-1">{order.status}</span>
-              </Badge>
-              <Badge className={getPaymentStatusColor(order.paymentStatus)}>
-                {order.paymentStatus}
-              </Badge>
-            </div>
-          </div>
-        </div>
 
-        <div>
-          <h4 className="font-semibold mb-2">Shipping Address</h4>
-          <p className="text-sm text-muted-foreground">
-            {order.shippingAddress}
-          </p>
-        </div>
-
-        <div>
-          <h4 className="font-semibold mb-2">Order Items</h4>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Product</TableHead>
-                <TableHead>Quantity</TableHead>
-                <TableHead>Unit Price</TableHead>
-                <TableHead>Total</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {order.items.map((item, index) => (
-                <TableRow key={index}>
-                  <TableCell>{item.name}</TableCell>
-                  <TableCell>{item.quantity}</TableCell>
-                  <TableCell>${item.price.toFixed(2)}</TableCell>
-                  <TableCell>
-                    ${(item.quantity * item.price).toFixed(2)}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-          <div className="flex justify-end mt-4">
-            <div className="text-right">
-              <p className="text-lg font-semibold">
-                Total: ${order.total.toFixed(2)}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4 text-sm text-muted-foreground">
-          <div>
-            <strong>Created:</strong>{" "}
-            {new Date(order.createdAt).toLocaleString()}
-          </div>
-          <div>
-            <strong>Last Updated:</strong>{" "}
-            {new Date(order.updatedAt).toLocaleString()}
-          </div>
-        </div>
-
-        <div>
-          <h4 className="font-semibold mb-2">Update Status</h4>
-          <Select
-            value={order.status}
-            onValueChange={(value: Order["status"]) =>
-              updateOrderStatus(order.id, value)
-            }
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="pending">Pending</SelectItem>
-              <SelectItem value="processing">Processing</SelectItem>
-              <SelectItem value="shipped">Shipped</SelectItem>
-              <SelectItem value="delivered">Delivered</SelectItem>
-              <SelectItem value="cancelled">Cancelled</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-    </DialogContent>
-  );
-
-  const totalRevenue = orders
-    .filter((o) => o.paymentStatus === "paid")
-    .reduce((sum, order) => sum + order.total, 0);
-  const pendingOrders = orders.filter((o) => o.status === "pending").length;
-  const shippedOrders = orders.filter((o) => o.status === "shipped").length;
+  
 
   return (
     <div className="space-y-6">
@@ -330,7 +274,7 @@ const OrdersManagement = () => {
             <Package2 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{orders.length}</div>
+            <div className="text-2xl font-bold">{mappedOrders.length}</div>
             <p className="text-xs text-muted-foreground">+3 new today</p>
           </CardContent>
         </Card>
@@ -342,7 +286,7 @@ const OrdersManagement = () => {
             <Clock className="h-4 w-4 text-yellow-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{pendingOrders}</div>
+            {/* <div className="text-2xl font-bold">{pendingOrders}</div> */}
             <p className="text-xs text-muted-foreground">Require attention</p>
           </CardContent>
         </Card>
@@ -354,7 +298,7 @@ const OrdersManagement = () => {
             <Truck className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{shippedOrders}</div>
+            {/* <div className="text-2xl font-bold">{shippedOrders}</div> */}
             <p className="text-xs text-muted-foreground">In transit</p>
           </CardContent>
         </Card>
@@ -364,7 +308,7 @@ const OrdersManagement = () => {
             <DollarSign className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${totalRevenue.toFixed(2)}</div>
+            {/* <div className="text-2xl font-bold">${totalRevenue.toFixed(2)}</div> */}
             <p className="text-xs text-muted-foreground">From paid orders</p>
           </CardContent>
         </Card>
@@ -417,7 +361,7 @@ const OrdersManagement = () => {
       {/* Orders Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Orders ({filteredOrders.length})</CardTitle>
+          <CardTitle>Orders ({initialOrders?.length})</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
@@ -434,19 +378,16 @@ const OrdersManagement = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredOrders.map((order) => (
+              {mappedOrders?.map((order:any) => (
                 <TableRow key={order.id}>
                   <TableCell className="font-medium">{order.id}</TableCell>
                   <TableCell>
                     <div>
-                      <p className="font-medium">{order.customerName}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {order.customerEmail}
-                      </p>
+                      <p className="font-medium">{order.firstName}</p>
                     </div>
                   </TableCell>
-                  <TableCell>{order.items.length} item(s)</TableCell>
-                  <TableCell>${order.total.toFixed(2)}</TableCell>
+                  <TableCell>{order?.products?.length} item(s)</TableCell>
+                  <TableCell>${order?.products.price?.toFixed(2)}</TableCell>
                   <TableCell>
                     <Badge className={getStatusColor(order.status)}>
                       {getStatusIcon(order.status)}

@@ -1,11 +1,17 @@
 "use client";
-import { useGetProductsQuery } from "@/hooks/product.hook";
+import { useGetAllProductsQuery } from "@/hooks/product.hook";
 import ProductCard from "./ProductCard";
 import { Product, TNewProduct } from "@/types";
 
-
 const FeaturedProducts = () => {
-  const { data } = useGetProductsQuery();
+  const { data } = useGetAllProductsQuery(
+    {
+      category: "featured",
+      sort: "createdAt",
+      searchTerm: "",
+    },
+    { keepPreviousData: true }
+  );
 
   console.log(data);
 

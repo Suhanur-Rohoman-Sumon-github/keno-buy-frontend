@@ -4,6 +4,7 @@ import {
   getUserOrders,
   getOrderById,
   updateOrderStatus,
+  getAllOrders,
 } from "@/services/orderService";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FieldValues } from "react-hook-form";
@@ -23,6 +24,12 @@ export const usePlaceOrderMutation = () => {
     },
   });
 };
+
+export const useGetAllOrderQuery = () =>
+  useQuery({
+    queryKey: ["orders"],
+    queryFn: () => getAllOrders(),
+  });
 
 export const useGetUserOrders = (userId: string) =>
   useQuery({

@@ -3,19 +3,37 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
   createProduct,
-  getAllProducts,
   getSingleProduct,
-  getRelatedProducts,
   addToFavorite,
   getFavoriteProducts,
+  getALlProducts,
+  updateProduct,
 } from "@/services/productService";
 
 // Fetch all products
-export const useGetProductsQuery = (query?: Record<string, string>) =>
-  useQuery({
-    queryKey: ["products", query],
-    queryFn: () => getAllProducts(query),
+export const useGetAllProductsQuery = (queryParams: {
+  category?: string;
+  categoryId?: string;
+  rating?: number | "";
+  sort?: string | "";
+  searchTerm?: string | "";
+}, p0: { keepPreviousData: boolean; }, ) => {
+
+  console.log(`Fetching products with params: ${JSON.stringify(queryParams)}`);
+  
+  const { data, refetch, isLoading, isError } = useQuery<any, Error>({
+    
+    queryKey: ["get-products", queryParams],
+    queryFn: async () => {
+      const data = await getALlProducts(queryParams);
+     
+      return data.data;
+
+    },
   });
+
+  return { data, refetch, isLoading, isError };
+};
 
 // Fetch single product
 export const useGetSingleProduct = (productId: string) =>
@@ -70,3 +88,24 @@ export const useGetFavoriteProducts = (userId: string) =>
     queryFn: () => getFavoriteProducts(userId),
     enabled: !!userId,
   });
+
+
+  export const useUpdateProductMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: ["update-product"],
+    mutationFn: ({ productId, payload }: { productId: string; payload: Record<string, unknown> }) =>
+   updateProduct(productId, payload),
+
+    onSuccess: () => {
+      toast.success("Product updated successfully");
+      queryClient.invalidateQueries({ queryKey: ["get-products"] });
+      queryClient.invalidateQueries({ queryKey: ["product"] }); // optionally invalidate single product query as well
+    },
+
+    onError: (error: any) => {
+      toast.error(error.message || "Failed to update product");
+    },
+  });
+};
