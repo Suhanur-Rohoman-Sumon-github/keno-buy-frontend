@@ -110,36 +110,37 @@ const Checkout = () => {
     });
   };
 
-  const onSubmit = async (data) => {
-    setIsProcessing(true);
+ const onSubmit = async (data: any) => {
+   setIsProcessing(true);
 
-    try {
-      const orderPayload = {
-        products: [
-          {
-            product: "6880d9a72b13a07f13485d23",
-            quantity: 2,
-          },
-        ],
+   try {
+     const orderPayload = {
+       products: [
+         {
+           product: "6880d9a72b13a07f13485d23",
+           quantity: 2,
+         },
+       ],
 
-        firstName: data.firstName,
-        items: checkoutItems,
-        totalAmount: total,
-        phone: data.phone,
-        address: data.address,
-        district: data.district,
-        notes: data.notes,
-        paymentMethod,
-      };
+       firstName: data.firstName,
+       phone: data.phone,
+       address: data.address,
+       district: data.district,
+       notes: data.notes,
+       paymentMethod: paymentMethod, // make sure this variable is valid
+       status: "pending", // add default status if required
+       totalAmount: total, // make sure total is a number
+     };
 
-      crateOrder(orderPayload);
-      router.push("/OrderSuccess");
-    } catch (error) {
-      console.error("Order failed", error);
-    } finally {
-      setIsProcessing(false);
-    }
-  };
+     await crateOrder(orderPayload); // typo? maybe `createOrder`?
+     router.push("/OrderSuccess");
+   } catch (error) {
+     console.error("Order failed", error);
+   } finally {
+     setIsProcessing(false);
+   }
+ };
+
 
   if (cartLoading && !productId) {
     return <div className="text-center p-4">লোড হচ্ছে...</div>;
