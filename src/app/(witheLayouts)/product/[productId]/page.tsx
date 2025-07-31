@@ -26,7 +26,7 @@ import { useGetSingleProduct } from "@/hooks/product.hook";
 
 const ProductDetails = () => {
   const { productId } = useParams();
-  console.log("Product ID:", productId);
+
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
 
@@ -170,7 +170,7 @@ const ProductDetails = () => {
 
   const handleAddToCart = () => {};
 
-  const handleBuyNow = (id:any) => {
+  const handleBuyNow = (id: any) => {
     // Redirect to checkout form
     window.location.href = `/checkout?productId=${id}&quantity=${quantity}`;
   };
