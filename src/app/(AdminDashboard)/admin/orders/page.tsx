@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -38,7 +38,10 @@ import {
   Clock,
   DollarSign,
 } from "lucide-react";
-import { useGetAllOrderQuery, useUpdateOrderStatusMutation } from "@/hooks/order.hook";
+import {
+  useGetAllOrderQuery,
+  useUpdateOrderStatusMutation,
+} from "@/hooks/order.hook";
 
 interface Order {
   products: any;
@@ -58,20 +61,40 @@ interface Order {
   updatedAt: string;
 }
 
-
-
 const OrdersManagement = () => {
-
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [paymentFilter, setPaymentFilter] = useState("all");
+  const [debouncedSearch, setDebouncedSearch] = useState(searchTerm);
 
-  const { data, isLoading } = useGetAllOrderQuery();
-  const ordersArray = Array.isArray(data) ? data : [];
+  useEffect(() => {
+    const handler = setTimeout(() => setDebouncedSearch(searchTerm), 500);
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
+
+  // combine all filters into one string to send as 'searchTerm'
+  const combinedSearchTerm = [
+    debouncedSearch,
+    statusFilter !== "all" ? statusFilter : "",
+    paymentFilter !== "all" ? paymentFilter : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  const queryParams = combinedSearchTerm
+    ? { searchTerm: combinedSearchTerm }
+    : {};
+
+  const { data, isLoading } = useGetAllOrderQuery(queryParams);
 
   if (isLoading) {
     return <div>loading...</div>;
   }
+
+ 
+
+  const ordersArray = Array.isArray(data?.data) ? data?.data : [];
+  
 
   const mappedOrders = ordersArray?.map((o: any) => {
     return {
@@ -97,8 +120,6 @@ const OrdersManagement = () => {
   if (isLoading) {
     return <div>Loading...</div>;
   }
-
- 
 
   const getStatusColor = (status: Order["status"]) => {
     switch (status) {
@@ -146,8 +167,6 @@ const OrdersManagement = () => {
         return <Clock className="h-4 w-4" />;
     }
   };
-
-
 
   const OrderDetailsDialog = ({ order }: { order: Order }) => {
     const updateOrderMutation = useUpdateOrderStatusMutation();
@@ -258,9 +277,6 @@ const OrdersManagement = () => {
       </DialogContent>
     );
   };
-
-
-  
 
   return (
     <div className="space-y-6">

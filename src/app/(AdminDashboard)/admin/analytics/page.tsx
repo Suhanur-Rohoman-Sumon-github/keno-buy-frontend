@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import {
   Card,
@@ -35,9 +36,13 @@ import {
   MousePointer,
 } from "lucide-react";
 import { useState } from "react";
+import { useGetCategoryQuery } from "@/hooks/category.hook";
 
 const Analytics = () => {
   const [selectedPeriod, setSelectedPeriod] = useState("30d");
+
+  const { data: categories, isLoading: loadingCategories } =
+    useGetCategoryQuery();
 
   // Sample data for charts
   const revenueData = [
@@ -55,12 +60,12 @@ const Analytics = () => {
     { month: "Dec", revenue: 10500, orders: 201, customers: 78 },
   ];
 
-  const categoryData = [
-    { name: "Clothing", value: 45, color: "#8884d8" },
-    { name: "Electronics", value: 30, color: "#82ca9d" },
-    { name: "Accessories", value: 15, color: "#ffc658" },
-    { name: "Home", value: 10, color: "#ff7300" },
-  ];
+  // const categoryData = [
+  //   { name: "Clothing", value: 45, color: "#8884d8" },
+  //   { name: "Electronics", value: 30, color: "#82ca9d" },
+  //   { name: "Accessories", value: 15, color: "#ffc658" },
+  //   { name: "Home", value: 10, color: "#ff7300" },
+  // ];
 
   const topProducts = [
     {
@@ -244,7 +249,7 @@ const Analytics = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {categoryData.map((category, index) => (
+              {categories?.map((category: any, index: number) => (
                 <div key={index} className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div

@@ -1,29 +1,25 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
-import ProductCard from "./ProductCard";
-import ProductCardSkeleton from "./ProductCardSkeleton";
+import { useParams } from "next/navigation";
 import { useGetAllProductsQuery } from "@/hooks/product.hook";
 import { Product } from "@/types";
+import ProductCardSkeleton from "@/components/home/ProductCardSkeleton";
+import ProductCard from "@/components/home/ProductCard";
 
-const FeaturedProducts = () => {
-  const searchParams = useSearchParams();
-  const searchTerm = searchParams.get("searchTerm") || "";
+const CategoryProducts = () => {
+  const { id } = useParams(); // Get dynamic segment: category/[id]
 
   const { data, isLoading } = useGetAllProductsQuery(
     {
-      category: "featured",
+      category: id as string,
       sort: "createdAt",
-      searchTerm, // use searchTerm from URL query
+      searchTerm: "", // no searchTerm here
     },
     { keepPreviousData: true }
   );
 
   return (
     <section>
-      <h2 className="text-2xl font-bold text-center mb-6">
-        Explore our Products
-      </h2>
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-4">
           {isLoading
@@ -39,4 +35,4 @@ const FeaturedProducts = () => {
   );
 };
 
-export default FeaturedProducts;
+export default CategoryProducts;

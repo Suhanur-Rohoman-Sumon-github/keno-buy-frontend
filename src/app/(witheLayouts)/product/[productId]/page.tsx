@@ -20,7 +20,6 @@ import {
 
 import Image from "next/image";
 import Link from "next/link";
-import ProductCard from "@/components/home/ProductCard";
 import ReviewPage from "@/components/revew/RevewPage";
 import { useParams } from "next/navigation";
 import { useGetSingleProduct } from "@/hooks/product.hook";
@@ -171,9 +170,9 @@ const ProductDetails = () => {
 
   const handleAddToCart = () => {};
 
-  const handleBuyNow = () => {
+  const handleBuyNow = (id:any) => {
     // Redirect to checkout form
-    window.location.href = `/checkout?product=${product.id}&quantity=${quantity}`;
+    window.location.href = `/checkout?productId=${id}&quantity=${quantity}`;
   };
 
   const handleWishlist = () => {};
@@ -276,12 +275,12 @@ const ProductDetails = () => {
               {/* Price */}
               <div className="flex items-center gap-3 mb-6">
                 <span className="text-3xl font-bold text-foreground">
-                  ৳{product.price}
+                  ৳{product.price * quantity}
                 </span>
                 {product.originalPrice && (
                   <>
                     <span className="text-xl text-muted-foreground line-through">
-                      ৳{product.originalPrice}
+                      ৳{product.originalPrice * quantity}
                     </span>
                     <Badge variant="destructive">{product.discount}% OFF</Badge>
                   </>
@@ -330,16 +329,7 @@ const ProductDetails = () => {
             <div className="space-y-3">
               <div className="flex gap-3">
                 <Button
-                  onClick={handleAddToCart}
-                  className="flex-1"
-                  variant="outline"
-                  disabled={!product.inStock}
-                >
-                  <ShoppingCart className="w-4 h-4 mr-2" />
-                  Add to Cart
-                </Button>
-                <Button
-                  onClick={handleBuyNow}
+                  onClick={() => handleBuyNow(product._id)}
                   className="flex-1"
                   disabled={!product.inStock}
                 >

@@ -146,7 +146,7 @@ const ProductCard = ({
       </Link>
 
       <div className="p-2 -mt-8">
-        <Link href={`/checkout?productId=${_id}`} className="w-full">
+        <Link href={`/checkout?productId=${_id}&quantity=1`} className="w-full">
           <Button
             className="w-full"
             size="sm"

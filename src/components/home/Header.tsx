@@ -9,6 +9,7 @@ import Link from "next/link";
 import Image from "next/image";
 import clsx from "clsx";
 import { useGetCart } from "@/hooks/cart.hook";
+import { useGetCategoryQuery } from "@/hooks/category.hook";
 
 const Header = () => {
   const router = useRouter();
@@ -18,6 +19,9 @@ const Header = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [hydrated, setHydrated] = useState(false); // prevent mismatch
+
+  const { data: categories, isLoading: loadingCategories } =
+    useGetCategoryQuery();
 
   // Local cart count for instant update
   const [localCartCount, setLocalCartCount] = useState(0);
@@ -81,27 +85,33 @@ const Header = () => {
   // Use localCartCount first for instant feedback
   const cartCount = localCartCount || backendCount;
 
-  const categories = [
-    "Attar",
-    "Panjabi",
-    "T-Shirt",
-    "Polo",
-    "Pants & Trouser",
-    "Sneakers",
-    "Tupi",
-    "Natural Foods",
-    "Combo Offers",
-  ];
+  // const categories = [
+  //   "Attar",
+  //   "Panjabi",
+  //   "T-Shirt",
+  //   "Polo",
+  //   "Pants & Trouser",
+  //   "Sneakers",
+  //   "Tupi",
+  //   "Natural Foods",
+  //   "Combo Offers",
+  // ];
 
   const handleSearch = (
     e: React.FormEvent<HTMLFormElement> | React.MouseEvent<HTMLButtonElement>
   ) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      router.push(`/search?query=${encodeURIComponent(searchQuery.trim())}`);
+      router.push(`/?searchTerm=${encodeURIComponent(searchQuery.trim())}`);
       setSearchQuery("");
     }
   };
+
+  if (loadingCategories) {
+    return <div>Loading categories...</div>;
+  }
+
+  console.log("Categories:", categories);
 
   return (
     <>
@@ -216,16 +226,16 @@ const Header = () => {
           </Button>
         </div>
         <ul className="p-4 space-y-2">
-          {categories.map((category, idx) => (
+          {categories?.map((category:any, idx:number) => (
             <li key={idx}>
               <Link
-                href={`/category/${category
+                href={`/category/${category._id
                   .toLowerCase()
                   .replace(/\s+/g, "-")}`}
                 onClick={() => setIsMenuOpen(false)}
                 className="block px-2 py-2 text-gray-700 hover:bg-gray-100 rounded"
               >
-                {category}
+                {category.name}
               </Link>
             </li>
           ))}

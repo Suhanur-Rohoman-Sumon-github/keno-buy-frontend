@@ -22,14 +22,28 @@ export const getUserOrders = async (userId: string) => {
     throw new Error(error.response?.data?.message || "Failed to fetch user orders");
   }
 };
-export const getAllOrders = async () => {
+export const getAllOrders = async (queryParams: {
+  searchTerm?: string;
+  
+}) => {
   try {
-    const { data } = await axiosInstance.get(`/orders`);
+    const { searchTerm} = queryParams;
+
+    const query = new URLSearchParams();
+
+    if (searchTerm) query.append("searchTerm", searchTerm);
+   
+
+    const { data } = await axiosInstance.get(`/orders?${query.toString()}`);
+ 
     return data.data;
   } catch (error: any) {
-    throw new Error(error.response?.data?.message || "Failed to fetch user orders");
+    throw new Error(
+      error.response?.data?.message || "Failed to fetch orders"
+    );
   }
 };
+
 
 // ✅ Get single order by ID
 export const getOrderById = async (orderId: string) => {
