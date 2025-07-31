@@ -187,12 +187,12 @@ const ProductDetails = () => {
             Home
           </Link>
           <span className="mx-2">/</span>
-          <Link
+          {/* <Link
             href={`/category/${product?.category}`}
             className="hover:text-primary capitalize"
           >
             {product?.category.replace("-", " ")}
-          </Link>
+          </Link> */}
           <span className="mx-2">/</span>
           <span className="text-foreground">{product.name}</span>
         </nav>

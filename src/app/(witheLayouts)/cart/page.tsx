@@ -8,12 +8,16 @@ import { X, Trash2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useGetCart } from "@/hooks/cart.hook";
+import {
+  useGetCart,
+  useRemoveFromCartMutation,
+  useClearCartMutation,
+} from "@/hooks/cart.hook";
 
 const CartPage = () => {
   const [userEmail, setUserEmail] = useState<string | null>(null);
 
-  // ✅ On mount, get email from localStorage
+  // On mount, get email from localStorage
   useEffect(() => {
     if (typeof window !== "undefined") {
       const email = localStorage.getItem("userEmail");
@@ -23,8 +27,9 @@ const CartPage = () => {
     }
   }, []);
 
-  // ✅ Only fetch cart if userEmail is available
   const { data: cartData, isLoading } = useGetCart(userEmail || "");
+  const removeFromCart = useRemoveFromCartMutation();
+  const clearCartMutation = useClearCartMutation();
 
   if (!userEmail) {
     return (
@@ -53,12 +58,54 @@ const CartPage = () => {
   const discount = 0;
   const total = subtotal - discount;
 
+  const handleRemoveItem = (productId: string) => {
+    if (!userEmail) return;
+
+    removeFromCart.mutate(
+      { userId: userEmail, productId },
+      {
+        onSuccess: () => {
+          // Update localStorage
+          const storedItems = JSON.parse(
+            localStorage.getItem("cartItems") || "[]"
+          );
+          const updatedItems = storedItems.filter(
+            (i: any) => i.productId !== productId
+          );
+          localStorage.setItem("cartItems", JSON.stringify(updatedItems));
+
+          // Trigger update event
+          window.dispatchEvent(new Event("cartUpdated"));
+        },
+      }
+    );
+  };
+
+  const handleClearCart = () => {
+    if (!userEmail) return;
+
+    clearCartMutation.mutate(userEmail, {
+      onSuccess: () => {
+        // Clear localStorage
+        localStorage.setItem("cartItems", "[]");
+
+        // Trigger update event
+        window.dispatchEvent(new Event("cartUpdated"));
+      },
+    });
+  };
+
   return (
-    <div className=" mx-auto px-4 py-8">
+    <div className="mx-auto px-4 py-8">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Your Cart</h1>
-        <Button variant="destructive" size="sm">
+        <Button
+          variant="destructive"
+          size="sm"
+          onClick={handleClearCart}
+          disabled={clearCartMutation.isPending}
+        >
           <Trash2 className="h-4 w-4 mr-2" /> Clear Cart
         </Button>
       </div>
@@ -72,8 +119,8 @@ const CartPage = () => {
                 <Image
                   src={item.product.image}
                   alt={item.product.name}
-                  layout="fill"
-                  objectFit="cover"
+                  fill
+                  style={{ objectFit: "cover" }}
                 />
               </div>
               <div className="flex-1">
@@ -85,7 +132,12 @@ const CartPage = () => {
                   <Badge variant="outline">Qty: {item.quantity}</Badge>
                 </div>
               </div>
-              <Button size="icon" variant="ghost">
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={() => handleRemoveItem(item.product._id)}
+                disabled={removeFromCart.isPending}
+              >
                 <X className="h-4 w-4 text-destructive" />
               </Button>
             </Card>

@@ -16,34 +16,70 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [hydrated, setHydrated] = useState(false); // prevent mismatch
 
-  // 1. On mount, get the email from localStorage
+  // Local cart count for instant update
+  const [localCartCount, setLocalCartCount] = useState(0);
+
+  // Function to read from localStorage
+  const calculateLocalCartCount = () => {
+    try {
+      const cartItems = JSON.parse(localStorage.getItem("cartItems") || "[]");
+      const count = cartItems.reduce(
+        (sum: number, item: any) => sum + (item.quantity || 0),
+        0
+      );
+      setLocalCartCount(count);
+    } catch {
+      setLocalCartCount(0);
+    }
+  };
+
+  // 1. On mount, get the email from localStorage and local cart items
   useEffect(() => {
     if (typeof window !== "undefined") {
       const email = localStorage.getItem("userEmail");
       setUserEmail(email);
+      calculateLocalCartCount();
+      setHydrated(true);
     }
   }, []);
 
-  console.log("User Email:", userEmail);
+  // 2. Fetch cart with react-query hook
+  const { data: cartData, isLoading, refetch } = useGetCart(userEmail || "");
 
-  // 2. Fetch cart with react-query hook once we have the userEmail
-  const { data: cartData, isLoading } = useGetCart(userEmail || "");
+  // Refetch when userEmail exists
+  useEffect(() => {
+    if (userEmail) {
+      refetch();
+    }
+  }, [userEmail, refetch]);
 
-  if (isLoading) {
-    return <div className="text-center p-4"></div>;
-  }
+  // 3. Listen for "cartUpdated" event
+  useEffect(() => {
+    const handleCartUpdate = () => {
+      calculateLocalCartCount(); // update immediately from localStorage
+      refetch(); // sync backend
+    };
 
-  console.log(cartData);
+    window.addEventListener("cartUpdated", handleCartUpdate);
+    return () => {
+      window.removeEventListener("cartUpdated", handleCartUpdate);
+    };
+  }, [refetch]);
 
-  // 3. Calculate cart count from backend data (fallback to 0)
-  const cartCount =
+  if (!hydrated) return null; // prevent mismatch on SSR
+
+  // Backend count
+  const backendCount =
     cartData?.items?.reduce(
       (sum: number, item: any) => sum + item.quantity,
       0
     ) || 0;
+
+  // Use localCartCount first for instant feedback
+  const cartCount = localCartCount || backendCount;
 
   const categories = [
     "Attar",
@@ -57,29 +93,13 @@ const Header = () => {
     "Combo Offers",
   ];
 
-  const updateCartCount = () => {
-    const storedCart = localStorage.getItem("cartItems");
-  };
-
-  // useEffect(() => {
-  //   updateCartCount();
-
-  //   // Listen for custom "cartUpdated" events
-  //   const handleCartUpdate = () => updateCartCount();
-  //   window.addEventListener("cartUpdated", handleCartUpdate);
-
-  //   return () => {
-  //     window.removeEventListener("cartUpdated", handleCartUpdate);
-  //   };
-  // }, []);
-
   const handleSearch = (
     e: React.FormEvent<HTMLFormElement> | React.MouseEvent<HTMLButtonElement>
   ) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       router.push(`/search?query=${encodeURIComponent(searchQuery.trim())}`);
-      setSearchQuery(""); // Clear input after search
+      setSearchQuery("");
     }
   };
 
@@ -94,7 +114,6 @@ const Header = () => {
               <Button
                 size="icon"
                 variant="ghost"
-                className=""
                 onClick={() => setIsMenuOpen(true)}
               >
                 <Menu className="h-5 w-5" />
@@ -203,7 +222,7 @@ const Header = () => {
                 href={`/category/${category
                   .toLowerCase()
                   .replace(/\s+/g, "-")}`}
-                onClick={() => setIsMenuOpen(false)} // Close sidebar after click
+                onClick={() => setIsMenuOpen(false)}
                 className="block px-2 py-2 text-gray-700 hover:bg-gray-100 rounded"
               >
                 {category}

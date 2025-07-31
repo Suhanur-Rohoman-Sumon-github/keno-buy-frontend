@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ShoppingCart, Star } from "lucide-react";
 import { useState } from "react";
-
 import Image from "next/image";
 import Link from "next/link";
 import { useAddToCartMutation } from "@/hooks/cart.hook";
@@ -36,14 +36,12 @@ const ProductCard = ({
   category = "attar",
 }: ProductCardProps) => {
   const [addedToCart, setAddedToCart] = useState(false);
-
   const { mutate: addTocart } = useAddToCartMutation();
 
-  // Function to add product to localStorage
   const handleAddToCart = () => {
     if (typeof window === "undefined") return;
 
-    // 1. Get or generate userEmail
+    // Ensure user email exists
     let userEmail = localStorage.getItem("userEmail");
     if (!userEmail) {
       const randomEmail = `user${Math.floor(
@@ -51,22 +49,31 @@ const ProductCard = ({
       )}@example.com`;
       localStorage.setItem("userEmail", randomEmail);
       userEmail = randomEmail;
-      console.log("Generated random email:", randomEmail);
     }
 
-    // 2. Call mutation
+    // Update localStorage instantly for frontend badge
+    const cartItems = JSON.parse(localStorage.getItem("cartItems") || "[]");
+    const existingIndex = cartItems.findIndex(
+      (item: any) => item.productId === _id
+    );
+
+    if (existingIndex >= 0) {
+      cartItems[existingIndex].quantity += 1;
+    } else {
+      cartItems.push({ productId: _id, quantity: 1, name: Title });
+    }
+
+    localStorage.setItem("cartItems", JSON.stringify(cartItems));
+
+    // Dispatch custom event so header updates immediately
+    window.dispatchEvent(new Event("cartUpdated"));
+
+    // Call backend mutation
     addTocart(
-      {
-        userEmail: userEmail,
-        productId: _id || "",
-        quantity: 1,
-      },
+      { userEmail, productId: _id || "", quantity: 1 },
       {
         onSuccess: () => {
           setAddedToCart(true);
-
-          // 3. Dispatch event for header to refetch cart
-          window.dispatchEvent(new Event("cartUpdated"));
         },
         onError: (error) => {
           console.error("Add to cart failed:", error);
@@ -79,7 +86,7 @@ const ProductCard = ({
     <Card className="border-0">
       <Link href={`/product/${_id}`} className="group">
         <CardContent className="p-0">
-          <div className="relative overflow-h_idden">
+          <div className="relative overflow-hidden">
             <Image
               height={500}
               width={500}
@@ -87,8 +94,6 @@ const ProductCard = ({
               alt={Title}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
-
-            {/* Badges */}
             <div className="absolute top-2 left-2 flex flex-col gap-1">
               {discount && (
                 <Badge className="bg-destructive text-white">
@@ -105,9 +110,7 @@ const ProductCard = ({
               )}
             </div>
           </div>
-
           <div className="p-4">
-            {/* Rating */}
             <div className="flex items-center gap-1 mb-2">
               <div className="flex">
                 {[...Array(5)].map((_, i) => (
@@ -124,14 +127,12 @@ const ProductCard = ({
               <span className="text-xs text-muted-foreground">({reviews})</span>
             </div>
 
-            {/* Product Name */}
             <Link href={`/product/${category}/${_id}`}>
               <h3 className="font-medium text-foreground mb-2 truncate group-hover:text-primary text-xs transition-colors">
                 {Title}
               </h3>
             </Link>
 
-            {/* Price */}
             <div className="flex items-center gap-2">
               <span className="text-lg font-bold text-primary">৳{price}</span>
               {originalPrice && (
@@ -143,6 +144,7 @@ const ProductCard = ({
           </div>
         </CardContent>
       </Link>
+
       <div className="p-2 -mt-8">
         <Link href={`/checkout?productId=${_id}`} className="w-full">
           <Button
