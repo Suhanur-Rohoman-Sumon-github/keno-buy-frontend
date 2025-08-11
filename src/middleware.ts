@@ -6,7 +6,7 @@ import { getCurrentUser } from "./services/authServices";
 const authRoutes = ["/login", "/register"];
 
 const protectedRoutes = {
-   user: ["/cart", "/wishList", "/marketplaces/:path*"],
+   user: [ "/wishList", "/marketplaces/:path*"],
   admin: ["/admin", "/admin/dashboard", "/admin/products", "/admin/orders"],
   vendor: ["/vendor"],
   
@@ -78,7 +78,7 @@ if (isProtectedMarketplace) {
 
 export const config = {
   matcher: [
-    "/cart",
+    
     "/wishList",
     "/login",
     "/register",
