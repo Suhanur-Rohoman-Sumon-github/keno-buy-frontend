@@ -12,11 +12,48 @@ interface IProps {
   name: string;
   label: string;
   disabled?: boolean;
+  value?: string; // ✅ Added for controlled usage
+  onChange?: (val: string) => void; // ✅ Added for controlled usage
 }
 
-export default function DSelect({ options, name, label, disabled }: IProps) {
+export default function DSelect({
+  options,
+  name,
+  label,
+  disabled,
+  value,
+  onChange,
+}: IProps) {
   const { control } = useFormContext();
 
+  if (onChange) {
+    // ✅ Controlled mode
+    return (
+      <div className="space-y-2">
+        <label
+          htmlFor={name}
+          className="block text-sm font-medium text-gray-700"
+        >
+          {label}
+        </label>
+
+        <Select value={value} onValueChange={onChange} disabled={disabled}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder={`Select ${label}`} />
+          </SelectTrigger>
+          <SelectContent className="bg-white shadow-lg rounded-md mt-1">
+            {options.map((option) => (
+              <SelectItem key={option.key} value={option.key}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+    );
+  }
+
+  // ✅ Default react-hook-form mode
   return (
     <div className="space-y-2">
       <label htmlFor={name} className="block text-sm font-medium text-gray-700">
@@ -35,7 +72,6 @@ export default function DSelect({ options, name, label, disabled }: IProps) {
             <SelectTrigger className="w-full">
               <SelectValue placeholder={`Select ${label}`} />
             </SelectTrigger>
-
             <SelectContent className="bg-white shadow-lg rounded-md mt-1">
               {options.map((option) => (
                 <SelectItem key={option.key} value={option.key}>

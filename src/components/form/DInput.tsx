@@ -11,6 +11,9 @@ interface IProps {
   name: string;
   islogin?: boolean;
   fullWidth?: boolean;
+  value?: string | number; // ✅ Added
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void; // ✅ Added
+  readOnly?: boolean; // ✅ Added for discounted price
 }
 
 const DInput = ({
@@ -20,6 +23,9 @@ const DInput = ({
   name,
   islogin = false,
   fullWidth = false,
+  value,
+  onChange,
+  readOnly = false,
 }: IProps) => {
   const {
     register,
@@ -30,19 +36,21 @@ const DInput = ({
   const [isVisible, setIsVisible] = React.useState(false);
   const toggleVisibility = () => setIsVisible(!isVisible);
 
+  const inputProps = {
+    ...(onChange ? { value, onChange } : { ...register(name) }), // ✅ If onChange is passed → controlled, else → react-hook-form
+  };
+
   return (
     <div className={`w-full ${fullWidth ? "w-full" : ""} space-y-1`}>
-      {/* Label */}
       <label htmlFor={name} className="block text-sm font-medium text-gray-700">
         {label}
         {required && <span className="text-red-500">*</span>}
       </label>
 
-      {/* Input wrapper */}
       <div className="relative">
         <input
-          {...register(name)}
           id={name}
+          {...inputProps}
           className={`block w-full px-4 py-2 text-sm border rounded-md ${
             errors[name]
               ? "border-red-500 focus:ring-red-500"
@@ -50,9 +58,9 @@ const DInput = ({
           }`}
           type={islogin && isVisible ? "text" : type}
           placeholder={islogin ? "Enter your password" : ""}
+          readOnly={readOnly}
         />
 
-        {/* Password visibility toggle */}
         {islogin && (
           <button
             type="button"
@@ -65,7 +73,6 @@ const DInput = ({
         )}
       </div>
 
-      {/* Error message */}
       {errorMessage && <p className="text-sm text-red-500">{errorMessage}</p>}
     </div>
   );

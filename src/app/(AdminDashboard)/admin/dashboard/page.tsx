@@ -229,7 +229,7 @@ const AdminDashboard = () => {
                       $
                       {order.products.reduce(
                         (sum: number, item: any) =>
-                          sum + item.quantity * item.product.price,
+                          sum + item.quantity * item?.product?.discountedPrice,
                         0
                       )}
                     </div>

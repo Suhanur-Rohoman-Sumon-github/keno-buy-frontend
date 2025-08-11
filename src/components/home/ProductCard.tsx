@@ -12,8 +12,8 @@ import { useAddToCartMutation } from "@/hooks/cart.hook";
 
 interface ProductCardProps {
   _id?: string;
-  name: string;
-  price: number;
+  Title: string;
+  discountedPrice: number;
   originalPrice?: number;
   images: string[];
   discount?: number;
@@ -25,8 +25,8 @@ interface ProductCardProps {
 
 const ProductCard = ({
   _id,
-  name: Title,
-  price,
+  Title,
+  discountedPrice,
   originalPrice,
   images,
   discount,
@@ -37,6 +37,8 @@ const ProductCard = ({
 }: ProductCardProps) => {
   const [addedToCart, setAddedToCart] = useState(false);
   const { mutate: addTocart } = useAddToCartMutation();
+
+  console.log("ProductCard rendered with ID:", name);
 
   const handleAddToCart = () => {
     if (typeof window === "undefined") return;
@@ -124,7 +126,7 @@ const ProductCard = ({
                   />
                 ))}
               </div>
-              <span className="text-xs text-muted-foreground">({reviews})</span>
+              <span className="text-xs text-muted-foreground">({rating})</span>
             </div>
 
             <Link href={`/product/${category}/${_id}`}>
@@ -134,7 +136,9 @@ const ProductCard = ({
             </Link>
 
             <div className="flex items-center gap-2">
-              <span className="text-lg font-bold text-primary">৳{price}</span>
+              <span className="text-lg font-bold text-primary">
+                ৳{discountedPrice}
+              </span>
               {originalPrice && (
                 <span className="text-sm text-muted-foreground line-through">
                   ৳{originalPrice}

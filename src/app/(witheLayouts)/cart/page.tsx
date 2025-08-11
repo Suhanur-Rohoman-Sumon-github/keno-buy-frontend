@@ -13,6 +13,7 @@ import {
   useRemoveFromCartMutation,
   useClearCartMutation,
 } from "@/hooks/cart.hook";
+import CartPageSkeleton from "@/components/skeleton/CartPageSkeleton";
 
 const CartPage = () => {
   const [userEmail, setUserEmail] = useState<string | null>(null);
@@ -40,19 +41,33 @@ const CartPage = () => {
   }
 
   if (isLoading) {
-    return <div className="text-center p-4">Loading your cart...</div>;
+    return <CartPageSkeleton />;
   }
 
   if (!cartData || cartData.items?.length === 0) {
     return (
       <div className="text-center p-4">
-        <p className="text-muted-foreground">Your cart is empty.</p>
+        <Image
+          src="https://w7.pngwing.com/pngs/675/43/png-transparent-empty-cart-illustration.png"
+          alt="Empty Cart"
+          width={200}
+          height={200}
+          className="mx-auto mb-4"
+        />
+        <h2 className="text-xl font-semibold mb-2">Your Cart is Empty</h2>
+        <p className="text-muted-foreground mb-4">
+          It seems you have not added anything to your cart yet.
+        </p>
+        <Button variant="default" asChild className="w-full max-w-xs mx-auto">
+          <Link href="/">Continue Shopping</Link>
+        </Button>
       </div>
     );
   }
 
   const subtotal = cartData.items.reduce(
-    (total: number, item: any) => total + item.product.price * item.quantity,
+    (total: number, item: any) =>
+      total + item?.product?.discountedPrice * item.quantity,
     0
   );
   const discount = 0;
@@ -117,19 +132,19 @@ const CartPage = () => {
             <Card key={item._id} className="flex items-center gap-4 p-4">
               <div className="w-24 h-24 relative rounded overflow-hidden">
                 <Image
-                  src={item.product.image}
-                  alt={item.product.name}
+                  src={item?.product?.images[0]}
+                  alt={item?.product?.Title}
                   fill
                   style={{ objectFit: "cover" }}
                 />
               </div>
               <div className="flex-1">
-                <h3 className="font-medium text-lg">{item.product.name}</h3>
+                <h3 className="font-medium text-lg">{item?.product?.Title}</h3>
                 <div className="flex items-center gap-2 mt-1">
                   <span className="text-primary font-semibold">
-                    ৳{item.product.price}
+                    ৳{item?.product?.discountedPrice}
                   </span>
-                  <Badge variant="outline">Qty: {item.quantity}</Badge>
+                  <Badge variant="outline">Qty: {item?.quantity}</Badge>
                 </div>
               </div>
               <Button
@@ -152,10 +167,7 @@ const CartPage = () => {
               <span>Subtotal</span>
               <span>৳{subtotal}</span>
             </div>
-            <div className="flex justify-between mb-2">
-              <span>Discount</span>
-              <span>-৳{discount}</span>
-            </div>
+
             <div className="flex justify-between font-bold text-lg mb-4">
               <span>Total</span>
               <span>৳{total}</span>

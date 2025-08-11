@@ -20,7 +20,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Select, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Search,
   Plus,
@@ -34,12 +40,13 @@ import {
 import { useGetAllProductsQuery } from "@/hooks/product.hook";
 import ProductCreateForm from "@/components/admin/ProductCreateForm";
 import UpdateProductForm from "@/components/admin/UpdateProductForm";
+import { useGetCategoryQuery } from "@/hooks/category.hook";
 
 interface Product {
   _id: string;
   Title: string;
   category: string;
-  price: number;
+  originalPrice: number;
   stock: number;
   status: "active" | "inactive" | "draft";
   sales: number;
@@ -51,6 +58,10 @@ const ProductsManagement = () => {
   const [isAddProductOpen, setIsAddProductOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [viewingProduct, setViewingProduct] = useState<Product | null>(null);
+
+  const { data: categories } = useGetCategoryQuery();
+
+  console.log("Categories:", categories);
 
   const [searchInput, setSearchInput] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
@@ -198,13 +209,14 @@ const ProductsManagement = () => {
               <SelectTrigger className="w-full sm:w-[200px]">
                 <SelectValue placeholder="Select category" />
               </SelectTrigger>
-              {/* <SelectContent>
-                {categories.map((category) => (
-                  <SelectItem key={category} value={category}>
-                    {category === "all" ? "All Categories" : category}
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                {categories?.map((category: any) => (
+                  <SelectItem key={category._id} value={category.slug}>
+                    {category.name}
                   </SelectItem>
                 ))}
-              </SelectContent> */}
+              </SelectContent>
             </Select>
           </div>
         </CardContent>
@@ -237,7 +249,7 @@ const ProductsManagement = () => {
                       {product.Title}
                     </TableCell>
                     <TableCell>{product.category}</TableCell>
-                    <TableCell>${product.price.toFixed(2)}</TableCell>
+                    <TableCell>${product?.originalPrice.toFixed(2)}</TableCell>
                     <TableCell>
                       <span className={stockStatus.color}>
                         {product.stock} ({stockStatus.label})
@@ -297,7 +309,8 @@ const ProductsManagement = () => {
                 <strong>Category:</strong> {viewingProduct.category}
               </p>
               <p>
-                <strong>Price:</strong> ${viewingProduct.price}
+                <strong>Price:</strong> $
+                {viewingProduct.originalPrice.toFixed(2)}
               </p>
               <p>
                 <strong>Stock:</strong> {viewingProduct.stock}
@@ -326,12 +339,12 @@ const ProductsManagement = () => {
             <DialogHeader>
               <DialogTitle>Edit Product</DialogTitle>
             </DialogHeader>
-            {editingProduct && (
+            {/* {editingProduct && (
               <UpdateProductForm
-                product={editingProduct}
+                productId={editingProduct._id}
                 onClose={() => setEditingProduct(null)}
               />
-            )}
+            )} */}
           </DialogContent>
         </Dialog>
       </Dialog>

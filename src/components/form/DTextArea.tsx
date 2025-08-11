@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useFormContext, useWatch } from "react-hook-form";
 import { useEffect } from "react";
 import { IInput } from "@/types";
@@ -6,6 +7,8 @@ import { Textarea } from "../ui/textarea";
 interface IProps extends IInput {
   type?: string;
   descriptions?: string;
+  value?: string; // ✅ for controlled usage
+  onChange?: (e: any) => void; // ✅ for controlled usage
 }
 
 export default function DTextArea({
@@ -13,6 +16,8 @@ export default function DTextArea({
   label,
   variant = "bordered",
   descriptions,
+  value,
+  onChange,
 }: IProps) {
   const {
     register,
@@ -30,7 +35,6 @@ export default function DTextArea({
 
   return (
     <div className="mb-4">
-      {/* Label */}
       {label && (
         <label
           htmlFor={name}
@@ -43,8 +47,10 @@ export default function DTextArea({
       <Textarea
         rows={8}
         id={name}
-        {...register(name)}
-        value={currentValue || descriptions || ""}
+        {...(onChange
+          ? { value: value ?? "", onChange } // ✅ controlled
+          : register(name))} // ✅ react-hook-form mode
+        value={onChange ? value ?? "" : currentValue || descriptions || ""}
         className={`${
           variant === "bordered" ? "border rounded-md" : ""
         } w-full px-3 py-2 text-sm`}

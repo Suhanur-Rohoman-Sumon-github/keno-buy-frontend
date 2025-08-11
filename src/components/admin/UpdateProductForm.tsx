@@ -34,14 +34,16 @@ const UpdateProductForm = ({ onClose, product }: UpdateProductFormProps) => {
   const { register, handleSubmit, reset } = useForm<ProductFormValues>();
   const { mutate: updateProduct } = useUpdateProductMutation();
 
+  
+
   // Prefill form with product values
   useEffect(() => {
     reset({
-      Title: product.Title,
-      category: product.category,
-      price: product.price,
-      stock: product.stock,
-      status: product.status,
+      Title: product?.Title,
+      category: product?.category,
+      price: product?.price,
+      stock: product?.stock,
+      status: product?.status,
     });
   }, [product, reset]);
 

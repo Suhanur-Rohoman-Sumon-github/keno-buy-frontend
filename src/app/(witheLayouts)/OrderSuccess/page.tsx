@@ -99,7 +99,7 @@ const OrderSuccess = () => {
                 </div>
                 <div className="flex items-center justify-center gap-2">
                   <Mail className="w-4 h-4" />
-                  <span>Email: support@believerssign.com</span>
+                  <span>Email: support@kenobuy.com</span>
                 </div>
               </div>
             </CardContent>

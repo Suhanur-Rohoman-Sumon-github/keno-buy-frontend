@@ -95,7 +95,10 @@ export const useGetFavoriteProducts = (userId: string) =>
 
   return useMutation({
     mutationKey: ["update-product"],
-    mutationFn: ({ productId, payload }: { productId: string; payload: Record<string, unknown> }) =>
+    mutationFn: ({ productId, payload }: { productId: string; payload: any }) =>
+
+      
+      
    updateProduct(productId, payload),
 
     onSuccess: () => {

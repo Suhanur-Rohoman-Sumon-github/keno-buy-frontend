@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PieChart, Pie, Cell, Legend } from "recharts";
 import {
   Table,
   TableBody,
@@ -37,11 +38,42 @@ import {
   XCircle,
   Clock,
   DollarSign,
+  AlertCircle,
 } from "lucide-react";
 import {
   useGetAllOrderQuery,
   useUpdateOrderStatusMutation,
 } from "@/hooks/order.hook";
+import Image from "next/image";
+
+interface CourierStats {
+  name: string;
+  logo: string;
+  total_parcel: number;
+  success_parcel: number;
+  cancelled_parcel: number;
+  success_ratio: number;
+}
+
+interface FraudData {
+  _id: string;
+  phone: string;
+  status: "success" | "failed" | "pending";
+  details: {
+    status: string;
+    courierData: Record<string, CourierStats> & {
+      summary: {
+        name: string;
+        logo: string;
+        total_parcel: number;
+        success_parcel: number;
+        cancelled_parcel: number;
+        success_ratio: number;
+      };
+    };
+    reports: any[];
+  };
+}
 
 interface Order {
   products: any;
@@ -59,6 +91,7 @@ interface Order {
   shippingAddress: string;
   createdAt: string;
   updatedAt: string;
+  fraudData?: FraudData;
 }
 
 const OrdersManagement = () => {
@@ -91,22 +124,20 @@ const OrdersManagement = () => {
     return <div>loading...</div>;
   }
 
- 
-
   const ordersArray = Array.isArray(data?.data) ? data?.data : [];
-  
 
   const mappedOrders = ordersArray?.map((o: any) => {
     return {
       id: o._id,
       firstName: o.firstName,
       products: o.products.map((p: any) => ({
-        name: p.product?.name || "Unknown",
+        name: p.product?.Title || "Unknown",
         quantity: p.quantity,
-        price: p.product?.price || 0,
+        price: p.product?.discountedPrice || 0,
       })),
       total: o.products.reduce(
-        (sum: number, p: any) => sum + (p.product?.price || 0) * p.quantity,
+        (sum: number, p: any) =>
+          sum + (p.product?.discountedPrice || 0) * p.quantity,
         0
       ),
       status: o.status,
@@ -114,6 +145,7 @@ const OrdersManagement = () => {
       shippingAddress: `${o.address}, ${o.district}`,
       createdAt: o.createdAt,
       updatedAt: o.updatedAt,
+      fraudData: o.fraudData,
     };
   });
 
@@ -230,7 +262,7 @@ const OrdersManagement = () => {
                   <TableRow key={index}>
                     <TableCell>{item.name}</TableCell>
                     <TableCell>{item.quantity}</TableCell>
-                    <TableCell>${item?.price?.toFixed(2)}</TableCell>
+                    <TableCell>${item.price.toFixed(2)}</TableCell>
                     <TableCell>
                       ${(item.quantity * item.price).toFixed(2)}
                     </TableCell>
@@ -273,6 +305,130 @@ const OrdersManagement = () => {
               </SelectContent>
             </Select>
           </div>
+        </div>
+      </DialogContent>
+    );
+  };
+
+  const FraudDetectionDialog = ({ order }: { order: Order }) => {
+    console.log(order);
+    if (!order.fraudData) {
+      return (
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Fraud Detection - Order {order.id}</DialogTitle>
+          </DialogHeader>
+          <p>No fraud data available for this order.</p>
+        </DialogContent>
+      );
+    }
+
+    const fraud = order.fraudData;
+
+    console.log(fraud);
+
+    const statusColorClass = (status: string) => {
+      switch (status) {
+        case "success":
+          return "bg-green-100 text-green-800";
+        case "failed":
+          return "bg-red-100 text-red-800";
+        case "pending":
+          return "bg-yellow-100 text-yellow-800";
+        default:
+          return "bg-gray-100 text-gray-800";
+      }
+    };
+
+    return (
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Fraud Detection - Order {order.id}</DialogTitle>
+          <DialogDescription>
+            Review possible fraudulent activity for this order.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          {/* Summary section in flex */}
+          <div className="flex flex-col sm:flex-row gap-4">
+            {/* Left side: Stats cards */}
+            <div className="flex flex-col gap-2 w-full sm:w-1/3">
+              <div className="bg-purple-500 text-white px-4 py-2 rounded font-semibold">
+                মোট পার্সেল: {fraud.details.courierData.summary.total_parcel}
+              </div>
+              <div className="bg-cyan-500 text-white px-4 py-2 rounded font-semibold">
+                সফল পার্সেল: {fraud.details.courierData.summary.success_parcel}
+              </div>
+              <div className="bg-red-500 text-white px-4 py-2 rounded font-semibold">
+                বাতিল পার্সেল:{" "}
+                {fraud.details.courierData.summary.cancelled_parcel}
+              </div>
+            </div>
+
+            {/* Right side: Pie Chart */}
+            <div className="flex-1 flex items-center justify-center">
+              {/* Replace with your chart component */}
+              <PieChart width={200} height={200}>
+                <Pie
+                  data={[
+                    {
+                      name: "সফল",
+                      value: fraud.details.courierData.summary.success_parcel,
+                    },
+                    {
+                      name: "বাতিল",
+                      value: fraud.details.courierData.summary.cancelled_parcel,
+                    },
+                  ]}
+                  dataKey="value"
+                  outerRadius={90}
+                  label
+                >
+                  <Cell fill="#22c55e" /> {/* Green */}
+                  <Cell fill="#ef4444" /> {/* Red */}
+                </Pie>
+                <Legend />
+              </PieChart>
+            </div>
+          </div>
+
+          {/* Courier Table */}
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>কুরিয়ার</TableHead>
+                <TableHead>মোট</TableHead>
+                <TableHead>সফল</TableHead>
+                <TableHead>বাতিল</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {Object.entries(fraud.details.courierData)
+                .filter(([key]) => key !== "summary")
+                .map(([key, courier]) => (
+                  <TableRow key={key}>
+                    <TableCell className="flex items-center gap-2">
+                      <Image
+                        height={200}
+                        width={500}
+                        src={courier.logo}
+                        alt={courier.name}
+                        className="h-10 w-10"
+                      />
+                      {courier.name}
+                    </TableCell>
+                    <TableCell>{courier.total_parcel}</TableCell>
+                    <TableCell className="text-green-600 font-semibold">
+                      {courier.success_parcel}
+                    </TableCell>
+                    <TableCell className="text-red-600 font-semibold">
+                      {courier.cancelled_parcel}
+                    </TableCell>
+                  </TableRow>
+                ))}
+            </TableBody>
+          </Table>
         </div>
       </DialogContent>
     );
@@ -433,6 +589,20 @@ const OrdersManagement = () => {
                         </Button>
                       </DialogTrigger>
                       <OrderDetailsDialog order={order} />
+                    </Dialog>
+
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          title="Detect Fraud"
+                          className="text-red-600 hover:bg-red-100"
+                        >
+                          <AlertCircle className="h-4 w-4" />
+                        </Button>
+                      </DialogTrigger>
+                      <FraudDetectionDialog order={order} />
                     </Dialog>
                   </TableCell>
                 </TableRow>

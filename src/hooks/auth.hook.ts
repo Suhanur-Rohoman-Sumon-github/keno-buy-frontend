@@ -30,7 +30,7 @@ export const useUserLoginMutations = () => {
     },
     onSuccess: () => {
       toast.success("user logged in  successfully");
-      router.push("/marketplaces");
+      router.push("/");
     },
     onError: (error) => {
       toast.error(error.message);

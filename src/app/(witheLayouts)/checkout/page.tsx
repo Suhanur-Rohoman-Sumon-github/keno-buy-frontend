@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,27 +16,41 @@ import Link from "next/link";
 import { useClearCartMutation, useGetCart } from "@/hooks/cart.hook";
 import { useGetSingleProduct } from "@/hooks/product.hook";
 import { usePlaceOrderMutation } from "@/hooks/order.hook";
-
-interface CartItem {
-  id: string;
-  name: string;
-  price: number;
-  quantity: number;
-  image: string;
-}
+// ... (rest of your imports)
 
 const Checkout = () => {
   const router = useRouter();
-  const { register, handleSubmit } = useForm();
+  const { register, handleSubmit, watch } = useForm();
   const [paymentMethod] = useState("cod");
   const [isProcessing, setIsProcessing] = useState(false);
-  const [checkoutItems, setCheckoutItems] = useState<CartItem[]>([]);
+  type CheckoutItem = {
+    id: string;
+    name: string;
+    discountedPrice: number;
+    quantity: number;
+    images: string;
+  };
+
+  const [checkoutItems, setCheckoutItems] = useState<CheckoutItem[]>([]);
   const [userEmail, setUserEmail] = useState<string | null>(null);
 
   const [productId, setProductId] = useState<string | null>(null);
   const [directQuantity, setDirectQuantity] = useState<number>(1);
   const [shippingFee, setShippingFee] = useState<number>(0);
-   const { mutate } = useClearCartMutation();
+  const { mutate } = useClearCartMutation();
+
+  const selectedDistrict = watch("district"); // <-- Watch district
+
+  // Automatically set shipping fee based on district
+  useEffect(() => {
+    if (selectedDistrict === "ঢাকা") {
+      setShippingFee(60);
+    } else if (selectedDistrict && selectedDistrict !== "ঢাকা") {
+      setShippingFee(180);
+    } else {
+      setShippingFee(0);
+    }
+  }, [selectedDistrict]);
 
   // Fetch userEmail
   useEffect(() => {
@@ -59,16 +73,15 @@ const Checkout = () => {
     userEmail || ""
   );
 
-  // If direct productId, show that product; otherwise, show cart items
   useEffect(() => {
     if (productId && singleProduct) {
       setCheckoutItems([
         {
           id: singleProduct._id,
           name: singleProduct.name,
-          price: singleProduct.price,
+          discountedPrice: singleProduct.discountedPrice,
           quantity: directQuantity,
-          image: singleProduct.image,
+          images: singleProduct.images,
         },
       ]);
     } else if (!productId && cartData) {
@@ -76,16 +89,16 @@ const Checkout = () => {
         cartData.items.map((item: any) => ({
           id: item.product._id,
           name: item.product.name,
-          price: item.product.price,
+          discountedPrice: item.product.discountedPrice,
           quantity: item.quantity,
-          image: item.product.image,
+          images: item.product.images,
         }))
       );
     }
   }, [productId, singleProduct, cartData, directQuantity]);
 
   const subtotal = checkoutItems.reduce(
-    (sum, item) => sum + item.price * item.quantity,
+    (sum, item) => sum + item.discountedPrice * item.quantity,
     0
   );
   const total = subtotal + shippingFee;
@@ -117,7 +130,6 @@ const Checkout = () => {
     } finally {
       setIsProcessing(false);
       if (!productId && userEmail) {
-       
         mutate(userEmail, {
           onSuccess: () => {
             localStorage.setItem("cartItems", "[]");
@@ -135,27 +147,7 @@ const Checkout = () => {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
-        <nav className="text-sm text-muted-foreground mb-8">
-          <Link href="/" className="hover:text-primary">
-            হোম
-          </Link>
-          <span className="mx-2">/</span>
-          <Link href="/cart" className="hover:text-primary">
-            কার্ট
-          </Link>
-          <span className="mx-2">/</span>
-          <span className="text-foreground">চেকআউট</span>
-        </nav>
-
-        <div className="flex items-center gap-4 mb-8">
-          <Link
-            href="/cart"
-            className="inline-flex items-center text-sm text-muted-foreground hover:text-primary"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            কার্টে ফিরে যান
-          </Link>
-        </div>
+        {/* ...breadcrumbs and back link */}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Checkout Form */}
@@ -246,7 +238,7 @@ const Checkout = () => {
                       <Image
                         height={64}
                         width={64}
-                        src={item.image}
+                        src={item.images[0]}
                         alt={item.name}
                         className="w-full h-full object-cover rounded-lg"
                       />
@@ -260,34 +252,12 @@ const Checkout = () => {
                           পরিমাণ: {item.quantity}
                         </span>
                         <span className="font-medium">
-                          ৳{item.price * item.quantity}
+                          ৳{item.discountedPrice * item.quantity}
                         </span>
                       </div>
                     </div>
                   </div>
                 ))}
-
-                <Separator />
-
-                {/* Shipping selection */}
-                <div className="space-y-2 w-full">
-                  <Button
-                    type="button"
-                    variant={shippingFee === 60 ? "default" : "outline"}
-                    onClick={() => setShippingFee(60)}
-                    className="w-full"
-                  >
-                    ঢাকার ভিতরে - ৬০ টাকা
-                  </Button>
-                  <Button
-                    type="button"
-                    variant={shippingFee === 180 ? "default" : "outline"}
-                    onClick={() => setShippingFee(180)}
-                    className="w-full"
-                  >
-                    ঢাকার বাইরে - ১৮০ টাকা
-                  </Button>
-                </div>
 
                 <Separator />
 

@@ -7,9 +7,8 @@ const page = () => {
     <div>
       <Hero />
       {/* <Categories /> */}
-      <React.Suspense fallback={<div>Loading...</div>}>
-        <FeaturedProducts />
-      </React.Suspense>
+
+      <FeaturedProducts />
     </div>
   );
 };

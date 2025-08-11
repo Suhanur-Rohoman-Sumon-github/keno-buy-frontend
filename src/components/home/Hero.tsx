@@ -51,7 +51,7 @@ const Hero = () => {
       {/* Slider */}
       <Slider {...sliderSettings} className="absolute inset-0 z-0">
         {slides.map((slide, index) => (
-          <div key={index} className="relative md:h-screen h-[200px] w-full">
+          <div key={index} className="relative md:h-[500px] h-[200px] w-full">
             <Image
               src={slide.image}
               alt={`Slide ${index + 1}`}

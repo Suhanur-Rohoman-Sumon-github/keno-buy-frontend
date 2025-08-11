@@ -58,6 +58,8 @@ export const logout =async () => {
 export const getCurrentUser = async () => {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get("accessToken")?.value;
+
+  
   
   if (accessToken) {
     const decodedToken = jwtDecode(accessToken) as {

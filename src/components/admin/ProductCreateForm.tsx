@@ -6,8 +6,6 @@ import { AiOutlineClose, AiOutlineUpload } from "react-icons/ai";
 import { FieldValues } from "react-hook-form";
 import { Category } from "@/types";
 
-
-
 import {
   DialogContent,
   DialogHeader,
@@ -21,6 +19,7 @@ import DForm from "../form/DForm";
 import DSelect from "../form/DSelect";
 import DTextArea from "../form/DTextArea";
 import { useCreateProductMutation } from "@/hooks/product.hook";
+import { useGetCategoryQuery } from "@/hooks/category.hook";
 
 interface ProductCreateFormProps {
   onClose: () => void;
@@ -31,13 +30,13 @@ const ProductCreateForm = ({ onClose }: ProductCreateFormProps) => {
   const [imagePreview, setImagePreview] = useState<string[]>([]);
 
   const { mutate: handleCreateProduct, isPending } = useCreateProductMutation();
-  // const { data: categories } = useGetCategoryQuery();
+  const { data: categories } = useGetCategoryQuery();
 
-  // const categoriesOptions =
-  //   categories?.map((category: Category) => ({
-  //     key: category.name,
-  //     label: category.name,
-  //   })) || [];
+  const categoriesOptions =
+    categories?.map((category: Category) => ({
+      key: category.name,
+      label: category.name,
+    })) || [];
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -122,15 +121,16 @@ const ProductCreateForm = ({ onClose }: ProductCreateFormProps) => {
       <DForm onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <DInput label="Product Name" name="Title" type="text" />
-          <DInput label="Price" name="price" type="number" />
+          <DInput label="buyPrice" name="buyPrice" type="number" />
+          <DInput label="Price" name="originalPrice" type="number" />
           <DInput label="Stock Quantity" name="Stock" type="number" />
-          <DInput label="Discount Price" name="discountedPrice" type="number" />
+
           <DInput label="discount" name="discount" type="number" />
-          {/* <DSelect
+          <DSelect
             options={categoriesOptions}
             name="category"
             label="Category"
-          /> */}
+          />
         </div>
         <div className="mt-6">
           <DTextArea label="Description" name="description" />

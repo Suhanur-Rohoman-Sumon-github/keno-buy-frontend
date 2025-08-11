@@ -21,7 +21,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className="antialiased  font-poppins ">
         <Providers>
-          <div className="flex flex-col min-h-screen">
+          <div className="flex flex-col min-h-screen  md:max-w-7xl mx-auto">
             <Header />
 
             <main className=" ">

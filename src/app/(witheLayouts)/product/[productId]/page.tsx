@@ -23,6 +23,7 @@ import Link from "next/link";
 import ReviewPage from "@/components/revew/RevewPage";
 import { useParams } from "next/navigation";
 import { useGetSingleProduct } from "@/hooks/product.hook";
+import ProductCardSkeleton from "@/components/home/ProductCardSkeleton";
 
 const ProductDetails = () => {
   const { productId } = useParams();
@@ -33,43 +34,8 @@ const ProductDetails = () => {
   const { data: product, isLoading } = useGetSingleProduct(productId as string);
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <ProductCardSkeleton />;
   }
-  console.log("Product Data:", product);
-
-  // Sample product data - in real app, this would come from API
-  // const product = {
-  //   id: "1",
-  //   name: "Premium Attar Collection 3pcs Set",
-  //   price: 975,
-  //   originalPrice: 1950,
-  //   images: [
-  //     "https://images.unsplash.com/photo-1541643600914-78b084683601?w=800&h=800&fit=crop",
-  //     "https://images.unsplash.com/photo-1541643600914-78b084683601?w=800&h=800&fit=crop",
-  //     "https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=800&h=800&fit=crop",
-  //   ],
-  //   discount: 50,
-  //   rating: 4.8,
-  //   reviews: 124,
-  //   inStock: true,
-  //   description:
-  //     "Experience the luxury of our premium attar collection. This carefully curated 3-piece set features our most popular fragrances, each crafted with the finest natural ingredients.",
-  //   features: [
-  //     "100% Natural ingredients",
-  //     "Long-lasting fragrance",
-  //     "Alcohol-free formula",
-  //     "Traditional distillation process",
-  //   ],
-  //   specifications: {
-  //     Brand: "Believers Sign",
-  //     Volume: "3ml each",
-  //     Type: "Attar/Essential Oil",
-  //     Origin: "Bangladesh",
-  //     "Shelf Life": "3 years",
-  //   },
-  //   category: "attar",
-  //   tags: ["Premium", "Natural", "Traditional", "Gift Set"],
-  // };
 
   // Category-specific styling
   const getCategoryTheme = (category: string) => {
@@ -121,81 +87,15 @@ const ProductDetails = () => {
   const theme = getCategoryTheme(product?.category);
 
   // Related products
-  const relatedProducts = [
-    {
-      id: "9",
-      name: "Royal Attar - Rose",
-      price: 450,
-      image:
-        "https://images.unsplash.com/photo-1592947967884-b6ab6cd7b89e?w=400&h=400&fit=crop",
-      rating: 4.7,
-      reviews: 89,
-      inStock: true,
-    },
-    {
-      id: "10",
-      name: "Musk Attar - 6ml",
-      price: 650,
-      originalPrice: 800,
-      image:
-        "https://images.unsplash.com/photo-1541643600914-78b084683601?w=400&h=400&fit=crop",
-      discount: 19,
-      rating: 4.6,
-      reviews: 156,
-      inStock: true,
-    },
-    {
-      id: "11",
-      name: "Oud Collection Set",
-      price: 1200,
-      image:
-        "https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=400&h=400&fit=crop",
-      rating: 4.9,
-      reviews: 67,
-      inStock: true,
-    },
-    {
-      id: "12",
-      name: "Amber Attar - 3ml",
-      price: 350,
-      originalPrice: 450,
-      image:
-        "https://images.unsplash.com/photo-1592947967884-b6ab6cd7b89e?w=400&h=400&fit=crop",
-      discount: 22,
-      rating: 4.5,
-      reviews: 234,
-      inStock: true,
-    },
-  ];
-
-  const handleAddToCart = () => {};
 
   const handleBuyNow = (id: any) => {
     // Redirect to checkout form
     window.location.href = `/checkout?productId=${id}&quantity=${quantity}`;
   };
 
-  const handleWishlist = () => {};
-
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
-        {/* Breadcrumb */}
-        <nav className="text-sm text-muted-foreground mb-8">
-          <Link href="/" className="hover:text-primary">
-            Home
-          </Link>
-          <span className="mx-2">/</span>
-          {/* <Link
-            href={`/category/${product?.category}`}
-            className="hover:text-primary capitalize"
-          >
-            {product?.category.replace("-", " ")}
-          </Link> */}
-          <span className="mx-2">/</span>
-          <span className="text-foreground">{product.name}</span>
-        </nav>
-
         {/* Product Details */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
           {/* Product Images */}
@@ -275,7 +175,7 @@ const ProductDetails = () => {
               {/* Price */}
               <div className="flex items-center gap-3 mb-6">
                 <span className="text-3xl font-bold text-foreground">
-                  ৳{product.price * quantity}
+                  ৳{product.discountedPrice * quantity}
                 </span>
                 {product.originalPrice && (
                   <>
@@ -363,8 +263,7 @@ const ProductDetails = () => {
           </div>
         </div>
 
-        {/* Product Details Tabs */}
-        <Card className="mb-16">
+        {/* <Card className="mb-16">
           <CardContent className="p-6">
             <Tabs defaultValue="description" className="w-full">
               <TabsList className="grid w-full grid-cols-3">
@@ -393,7 +292,7 @@ const ProductDetails = () => {
                   </div>
                 </div>
               </TabsContent>
-              {/* <TabsContent value="specifications" className="mt-6">
+              <TabsContent value="specifications" className="mt-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {Object.entries(product.specifications).map(
                     ([key, value]) => (
@@ -407,7 +306,7 @@ const ProductDetails = () => {
                     )
                   )}
                 </div>
-              </TabsContent> */}
+              </TabsContent>
               <TabsContent value="reviews" className="mt-6">
                 <div className="text-center py-8">
                   <ReviewPage />
@@ -415,19 +314,7 @@ const ProductDetails = () => {
               </TabsContent>
             </Tabs>
           </CardContent>
-        </Card>
-
-        {/* Related Products */}
-        <section>
-          <h2 className="text-2xl font-bold text-foreground mb-8">
-            Related Products
-          </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {/* {relatedProducts.map((relatedProduct) => (
-              <ProductCard key={relatedProduct.id} {...relatedProduct} />
-            ))} */}
-          </div>
-        </section>
+        </Card> */}
       </div>
     </div>
   );

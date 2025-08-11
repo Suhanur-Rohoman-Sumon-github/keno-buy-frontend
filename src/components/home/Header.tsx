@@ -10,12 +10,16 @@ import Image from "next/image";
 import clsx from "clsx";
 import { useGetCart } from "@/hooks/cart.hook";
 import { useGetCategoryQuery } from "@/hooks/category.hook";
-
+import { RxAvatar } from "react-icons/rx";
+import HeaderSkeleton from "../skeleton/HeaderSkeleton";
+import { useUser } from "@/context/useProvider";
+import { logout } from "@/services/authServices";
 const Header = () => {
   const router = useRouter();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isAvatarMenuOpen, setIsAvatarMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [hydrated, setHydrated] = useState(false); // prevent mismatch
@@ -23,8 +27,14 @@ const Header = () => {
   const { data: categories, isLoading: loadingCategories } =
     useGetCategoryQuery();
 
+  const { user } = useUser();
+
   // Local cart count for instant update
   const [localCartCount, setLocalCartCount] = useState(0);
+
+  const handleLogout = () => {
+    logout();
+  };
 
   // Function to read from localStorage
   const calculateLocalCartCount = () => {
@@ -51,7 +61,11 @@ const Header = () => {
   }, []);
 
   // 2. Fetch cart with react-query hook
-  const { data: cartData, isLoading, refetch } = useGetCart(userEmail || "");
+  const {
+    data: cartData,
+    isLoading: cartLoading,
+    refetch,
+  } = useGetCart(userEmail || "");
 
   // Refetch when userEmail exists
   useEffect(() => {
@@ -85,39 +99,15 @@ const Header = () => {
   // Use localCartCount first for instant feedback
   const cartCount = localCartCount || backendCount;
 
-  // const categories = [
-  //   "Attar",
-  //   "Panjabi",
-  //   "T-Shirt",
-  //   "Polo",
-  //   "Pants & Trouser",
-  //   "Sneakers",
-  //   "Tupi",
-  //   "Natural Foods",
-  //   "Combo Offers",
-  // ];
-
-  const handleSearch = (
-    e: React.FormEvent<HTMLFormElement> | React.MouseEvent<HTMLButtonElement>
-  ) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      router.push(`/?searchTerm=${encodeURIComponent(searchQuery.trim())}`);
-      setSearchQuery("");
-    }
-  };
-
-  if (loadingCategories) {
-    return <div>Loading categories...</div>;
+  if (loadingCategories && cartLoading) {
+    return <HeaderSkeleton />;
   }
-
-  console.log("Categories:", categories);
 
   return (
     <>
       {/* Header */}
       <header className="bg-background border-b shadow-card sticky top-0 z-50 w-full">
-        <div className="container mx-auto px-4 py-4 md:w-11/12">
+        <div className="container mx-auto px-4 md:px-0 py-4 md:w-11/12">
           <div className="flex items-center justify-between">
             {/* Logo & Menu */}
             <div className="flex items-center space-x-2">
@@ -138,44 +128,54 @@ const Header = () => {
               </Link>
             </div>
 
-            {/* Search Bar (Desktop) */}
-            <form
-              onSubmit={handleSearch}
-              className="hidden md:flex flex-1 max-w-md mx-8"
-            >
-              <div className="relative w-full">
-                <Input
-                  type="text"
-                  placeholder="Search for products..."
-                  className="pr-10"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="absolute right-0 top-0 h-full"
-                  onClick={handleSearch}
-                  type="button"
-                >
-                  <Search className="h-4 w-4" />
-                </Button>
-              </div>
-            </form>
-
             {/* Right Actions */}
-            <div className="flex items-center space-x-2">
-              <Button
-                size="icon"
-                variant="ghost"
-                className="md:hidden"
-                onClick={() => setIsSearchOpen(!isSearchOpen)}
-              >
-                <Search className="h-5 w-5" />
-              </Button>
-              <Button variant="ghost" size="icon" className="hidden md:flex">
-                <User className="h-5 w-5" />
-              </Button>
+            <div className="flex items-center  relative">
+              {/* Avatar Dropdown */}
+              <div className="relative">
+                <button
+                  onClick={() => setIsAvatarMenuOpen((prev) => !prev)}
+                  className=" mt-1 "
+                >
+                  <RxAvatar className="h-5 w-5" />
+                </button>
+
+                {user
+                  ? isAvatarMenuOpen && (
+                      <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-md z-50">
+                        <button
+                          onClick={() => {
+                            handleLogout();
+                          }}
+                          className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                        >
+                          Logout
+                        </button>
+                      </div>
+                    )
+                  : isAvatarMenuOpen && (
+                      <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-md z-50">
+                        <button
+                          onClick={() => {
+                            setIsAvatarMenuOpen(false);
+                            router.push("/login");
+                          }}
+                          className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                        >
+                          Login
+                        </button>
+                        <button
+                          onClick={() => {
+                            setIsAvatarMenuOpen(false);
+                            router.push("/signup");
+                          }}
+                          className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                        >
+                          Register
+                        </button>
+                      </div>
+                    )}
+              </div>
+
               <Link href="/cart">
                 <Button variant="ghost" size="icon" className="relative">
                   <ShoppingCart className="h-5 w-5" />
@@ -189,23 +189,6 @@ const Header = () => {
             </div>
           </div>
         </div>
-
-        {/* Search Bar (Mobile) */}
-        {isSearchOpen && (
-          <div className="md:hidden bg-background p-4 border-t">
-            <form onSubmit={handleSearch} className="flex gap-2">
-              <Input
-                type="text"
-                placeholder="Search for products..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              <Button type="submit">
-                <Search className="h-4 w-4" />
-              </Button>
-            </form>
-          </div>
-        )}
       </header>
 
       {/* Left Sidebar */}
@@ -226,7 +209,7 @@ const Header = () => {
           </Button>
         </div>
         <ul className="p-4 space-y-2">
-          {categories?.map((category:any, idx:number) => (
+          {categories?.map((category: any, idx: number) => (
             <li key={idx}>
               <Link
                 href={`/category/${category._id

@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useUser } from "@/context/useProvider";
 
 interface AdminShellProps {
   children: React.ReactNode;
@@ -23,6 +24,11 @@ interface AdminShellProps {
 
 const AdminShell = ({ children }: AdminShellProps) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const { user } = useUser() || {};
+  if (!user) {
+    // While user is loading, show a loading spinner or empty sidebar
+    return;
+  }
 
   const sidebarItems = [
     {
@@ -65,6 +71,27 @@ const AdminShell = ({ children }: AdminShellProps) => {
     },
   ];
 
+  // Normalize role & paths
+  const normalizeRole = (role?: string) =>
+    role?.toLowerCase().replace(/\s+/g, "").trim();
+
+  const normalizePath = (path: string) =>
+    path.replace(/\/+$/, "").toLowerCase();
+
+  const role = normalizeRole(user?.role);
+  const allowedForSubAdmin = ["/admin/products", "/admin/orders"].map(
+    normalizePath
+  );
+
+  const filteredSidebarItems =
+    role === "subadmin"
+      ? sidebarItems.filter((item) => {
+          const match = allowedForSubAdmin.includes(normalizePath(item.href));
+          console.log(`Checking ${item.href}: match=${match}`);
+          return match;
+        })
+      : sidebarItems;
+
   return (
     <div className="flex pt-[57px]">
       {/* HEADER */}
@@ -90,7 +117,7 @@ const AdminShell = ({ children }: AdminShellProps) => {
               Admin Panel
             </Link>
             <Badge variant="secondary" className="hidden sm:flex">
-              Believers Sign
+              kenobuy Admin
             </Badge>
           </div>
           <div className="flex items-center gap-3">
@@ -120,8 +147,8 @@ const AdminShell = ({ children }: AdminShellProps) => {
         }`}
       >
         <div className="p-4">
-          <nav className="space-y-2">
-            {sidebarItems.map((item) => (
+          <nav className="space-y-2 ">
+            {filteredSidebarItems.map((item) => (
               <Link
                 key={item.id}
                 href={item.href}
@@ -152,7 +179,7 @@ const AdminShell = ({ children }: AdminShellProps) => {
       )}
 
       {/* MAIN CONTENT */}
-      <main className="flex-1 ml-0  p-4 bg-background min-h-screen">
+      <main className="flex-1 ml-0 p-4 bg-background min-h-screen">
         {children}
       </main>
     </div>
