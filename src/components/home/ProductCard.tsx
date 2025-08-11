@@ -12,8 +12,8 @@ import { useAddToCartMutation } from "@/hooks/cart.hook";
 
 interface ProductCardProps {
   _id?: string;
-  Title: string;
-  discountedPrice: number;
+  Title?: string;
+  discountedPrice?: number;
   originalPrice?: number;
   images: string[];
   discount?: number;
