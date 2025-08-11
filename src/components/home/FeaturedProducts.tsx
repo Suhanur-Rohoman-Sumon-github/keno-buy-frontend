@@ -1,20 +1,15 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
 import ProductCard from "./ProductCard";
 import ProductCardSkeleton from "./ProductCardSkeleton";
 import { useGetAllProductsQuery } from "@/hooks/product.hook";
 import { Product } from "@/types";
 
 const FeaturedProducts = () => {
-  const searchParams = useSearchParams();
-  const searchTerm = searchParams.get("searchTerm") || "";
-
   const { data, isLoading } = useGetAllProductsQuery(
     {
       category: "featured",
       sort: "createdAt",
-      searchTerm, // use searchTerm from URL query
     },
     { keepPreviousData: true }
   );
