@@ -2,41 +2,35 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Search, ShoppingCart, User, Menu, X } from "lucide-react";
+import { ShoppingCart, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import Image from "next/image";
 import clsx from "clsx";
 import { useGetCart } from "@/hooks/cart.hook";
 import { useGetCategoryQuery } from "@/hooks/category.hook";
 import { RxAvatar } from "react-icons/rx";
-import HeaderSkeleton from "../skeleton/HeaderSkeleton";
 import { useUser } from "@/context/useProvider";
 import { logout } from "@/services/authServices";
+
 const Header = () => {
   const router = useRouter();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isAvatarMenuOpen, setIsAvatarMenuOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
   const [userEmail, setUserEmail] = useState<string | null>(null);
-  const [hydrated, setHydrated] = useState(false); // prevent mismatch
+  const [hydrated, setHydrated] = useState(false);
 
-  const { data: categories, isLoading: loadingCategories } =
-    useGetCategoryQuery();
-
+  const { data: categories } = useGetCategoryQuery();
   const { user } = useUser();
 
-  // Local cart count for instant update
+  // Local cart count
   const [localCartCount, setLocalCartCount] = useState(0);
 
   const handleLogout = () => {
     logout();
   };
 
-  // Function to read from localStorage
   const calculateLocalCartCount = () => {
     try {
       const cartItems = JSON.parse(localStorage.getItem("cartItems") || "[]");
@@ -50,7 +44,6 @@ const Header = () => {
     }
   };
 
-  // 1. On mount, get the email from localStorage and local cart items
   useEffect(() => {
     if (typeof window !== "undefined") {
       const email = localStorage.getItem("userEmail");
@@ -60,48 +53,32 @@ const Header = () => {
     }
   }, []);
 
-  // 2. Fetch cart with react-query hook
-  const {
-    data: cartData,
-    isLoading: cartLoading,
-    refetch,
-  } = useGetCart(userEmail || "");
+  const { data: cartData, refetch } = useGetCart(userEmail || "");
 
-  // Refetch when userEmail exists
   useEffect(() => {
     if (userEmail) {
       refetch();
     }
   }, [userEmail, refetch]);
 
-  // 3. Listen for "cartUpdated" event
   useEffect(() => {
     const handleCartUpdate = () => {
-      calculateLocalCartCount(); // update immediately from localStorage
-      refetch(); // sync backend
+      calculateLocalCartCount();
+      refetch();
     };
-
     window.addEventListener("cartUpdated", handleCartUpdate);
     return () => {
       window.removeEventListener("cartUpdated", handleCartUpdate);
     };
   }, [refetch]);
 
-  if (!hydrated) return null; // prevent mismatch on SSR
-
-  // Backend count
   const backendCount =
     cartData?.items?.reduce(
       (sum: number, item: any) => sum + item.quantity,
       0
     ) || 0;
 
-  // Use localCartCount first for instant feedback
-  const cartCount = localCartCount || backendCount;
-
-  if (loadingCategories && cartLoading) {
-    return <HeaderSkeleton />;
-  }
+  const cartCount = hydrated ? localCartCount || backendCount : 0;
 
   return (
     <>
@@ -129,57 +106,59 @@ const Header = () => {
             </div>
 
             {/* Right Actions */}
-            <div className="flex items-center  relative">
-              {/* Avatar Dropdown */}
+            <div className="flex items-center relative">
+              {/* Avatar */}
               <div className="relative">
                 <button
                   onClick={() => setIsAvatarMenuOpen((prev) => !prev)}
-                  className=" mt-1 "
+                  className="mt-1"
                 >
                   <RxAvatar className="h-5 w-5" />
                 </button>
 
-                {user
-                  ? isAvatarMenuOpen && (
-                      <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-md z-50">
-                        <button
-                          onClick={() => {
-                            handleLogout();
-                          }}
-                          className="w-full text-left px-4 py-2 hover:bg-gray-100"
-                        >
-                          Logout
-                        </button>
-                      </div>
-                    )
-                  : isAvatarMenuOpen && (
-                      <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-md z-50">
-                        <button
-                          onClick={() => {
-                            setIsAvatarMenuOpen(false);
-                            router.push("/login");
-                          }}
-                          className="w-full text-left px-4 py-2 hover:bg-gray-100"
-                        >
-                          Login
-                        </button>
-                        <button
-                          onClick={() => {
-                            setIsAvatarMenuOpen(false);
-                            router.push("/signup");
-                          }}
-                          className="w-full text-left px-4 py-2 hover:bg-gray-100"
-                        >
-                          Register
-                        </button>
-                      </div>
-                    )}
+                {hydrated &&
+                  (user
+                    ? isAvatarMenuOpen && (
+                        <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-md z-50">
+                          <button
+                            onClick={() => {
+                              handleLogout();
+                            }}
+                            className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                          >
+                            Logout
+                          </button>
+                        </div>
+                      )
+                    : isAvatarMenuOpen && (
+                        <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-md z-50">
+                          <button
+                            onClick={() => {
+                              setIsAvatarMenuOpen(false);
+                              router.push("/login");
+                            }}
+                            className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                          >
+                            Login
+                          </button>
+                          <button
+                            onClick={() => {
+                              setIsAvatarMenuOpen(false);
+                              router.push("/signup");
+                            }}
+                            className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                          >
+                            Register
+                          </button>
+                        </div>
+                      ))}
               </div>
 
+              {/* Cart */}
               <Link href="/cart">
                 <Button variant="ghost" size="icon" className="relative">
                   <ShoppingCart className="h-5 w-5" />
-                  {cartCount > 0 && (
+                  {hydrated && cartCount > 0 && (
                     <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-semibold rounded-full px-1">
                       {cartCount}
                     </span>

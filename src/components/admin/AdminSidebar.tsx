@@ -87,7 +87,7 @@ const AdminShell = ({ children }: AdminShellProps) => {
     role === "subadmin"
       ? sidebarItems.filter((item) => {
           const match = allowedForSubAdmin.includes(normalizePath(item.href));
-         
+
           return match;
         })
       : sidebarItems;
@@ -147,7 +147,7 @@ const AdminShell = ({ children }: AdminShellProps) => {
         }`}
       >
         <div className="p-4">
-          <nav className="space-y-2 ">
+          <nav className="space-y-2  md:mt-0 mt-12">
             {filteredSidebarItems.map((item) => (
               <Link
                 key={item.id}
@@ -155,7 +155,7 @@ const AdminShell = ({ children }: AdminShellProps) => {
                 className="block"
                 onClick={() => setIsSidebarOpen(false)}
               >
-                <Button variant="ghost" className="w-full justify-start">
+                <Button variant="ghost" className="w-full justify-start ">
                   <item.icon className="h-4 w-4 mr-3" />
                   {item.label}
                   {item.badge && (

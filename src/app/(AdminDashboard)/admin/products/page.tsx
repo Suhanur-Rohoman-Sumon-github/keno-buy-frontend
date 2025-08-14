@@ -61,8 +61,6 @@ const ProductsManagement = () => {
 
   const { data: categories } = useGetCategoryQuery();
 
-
-
   const [searchInput, setSearchInput] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   useEffect(() => {

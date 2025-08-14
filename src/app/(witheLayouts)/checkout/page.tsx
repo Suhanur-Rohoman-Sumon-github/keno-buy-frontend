@@ -2,7 +2,6 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,19 +9,23 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, MapPin, Phone } from "lucide-react";
+import { MapPin, Phone } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
 import { useClearCartMutation, useGetCart } from "@/hooks/cart.hook";
 import { useGetSingleProduct } from "@/hooks/product.hook";
 import { usePlaceOrderMutation } from "@/hooks/order.hook";
-// ... (rest of your imports)
 
 const Checkout = () => {
   const router = useRouter();
-  const { register, handleSubmit, watch } = useForm();
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm();
   const [paymentMethod] = useState("cod");
   const [isProcessing, setIsProcessing] = useState(false);
+
   type CheckoutItem = {
     id: string;
     name: string;
@@ -33,15 +36,14 @@ const Checkout = () => {
 
   const [checkoutItems, setCheckoutItems] = useState<CheckoutItem[]>([]);
   const [userEmail, setUserEmail] = useState<string | null>(null);
-
   const [productId, setProductId] = useState<string | null>(null);
   const [directQuantity, setDirectQuantity] = useState<number>(1);
   const [shippingFee, setShippingFee] = useState<number>(0);
   const { mutate } = useClearCartMutation();
 
-  const selectedDistrict = watch("district"); // <-- Watch district
+  const selectedDistrict = watch("district");
 
-  // Automatically set shipping fee based on district
+  // Auto shipping fee
   useEffect(() => {
     if (selectedDistrict === "ঢাকা") {
       setShippingFee(60);
@@ -52,13 +54,13 @@ const Checkout = () => {
     }
   }, [selectedDistrict]);
 
-  // Fetch userEmail
+  // Fetch email
   useEffect(() => {
     const email = localStorage.getItem("userEmail");
     setUserEmail(email);
   }, []);
 
-  // Get query params for direct checkout
+  // Get params for direct checkout
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
     const pid = searchParams.get("productId");
@@ -74,10 +76,6 @@ const Checkout = () => {
   const { data: cartData, isLoading: cartLoading } = useGetCart(
     userEmail || ""
   );
-
-  if (isLoading) {
-    <p>loading.....</p>;
-  }
 
   useEffect(() => {
     if (productId && singleProduct) {
@@ -111,7 +109,6 @@ const Checkout = () => {
 
   const onSubmit = async (data: any) => {
     setIsProcessing(true);
-
     try {
       const orderPayload = {
         products: checkoutItems.map((item) => ({
@@ -153,8 +150,6 @@ const Checkout = () => {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
-        {/* ...breadcrumbs and back link */}
-
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Checkout Form */}
           <div className="space-y-6">
@@ -171,14 +166,24 @@ const Checkout = () => {
                   onSubmit={handleSubmit(onSubmit)}
                   className="space-y-4"
                 >
+                  {/* Name */}
                   <div className="space-y-2">
                     <Label htmlFor="firstName">আপনার নাম *</Label>
                     <Input
                       id="firstName"
-                      {...register("firstName", { required: true })}
+                      {...register("firstName", {
+                        required: "নাম প্রদান করুন",
+                        minLength: { value: 2, message: "কমপক্ষে ২ অক্ষর" },
+                      })}
                     />
+                    {errors.firstName && (
+                      <p className="text-red-500 text-sm">
+                        {errors.firstName.message as string}
+                      </p>
+                    )}
                   </div>
 
+                  {/* Phone */}
                   <div className="space-y-2">
                     <Label htmlFor="phone">মোবাইল নাম্বার *</Label>
                     <div className="relative">
@@ -187,26 +192,49 @@ const Checkout = () => {
                         id="phone"
                         type="tel"
                         className="pl-10"
-                        placeholder="+৮৮০ ১২৩৪ ৫৬৭৮৯০"
-                        {...register("phone", { required: true })}
+                        placeholder="+880 1XXXXXXXXX"
+                        {...register("phone", {
+                          required: "মোবাইল নাম্বার প্রদান করুন",
+                          pattern: {
+                            value: /^(?:\+8801[3-9]\d{8}|01[3-9]\d{8})$/,
+                            message: "সঠিক মোবাইল নাম্বার প্রদান করুন",
+                          },
+                        })}
                       />
                     </div>
+                    {errors.phone && (
+                      <p className="text-red-500 text-sm">
+                        {errors.phone.message as string}
+                      </p>
+                    )}
                   </div>
 
+                  {/* Address */}
                   <div className="space-y-2">
                     <Label htmlFor="address">সম্পূর্ণ ঠিকানা *</Label>
                     <Textarea
                       id="address"
                       placeholder="বাড়ি/বিল্ডিং, রাস্তা, এলাকা"
-                      {...register("address", { required: true })}
+                      {...register("address", {
+                        required: "ঠিকানা প্রদান করুন",
+                        minLength: { value: 5, message: "কমপক্ষে ৫ অক্ষর" },
+                      })}
                     />
+                    {errors.address && (
+                      <p className="text-red-500 text-sm">
+                        {errors.address.message as string}
+                      </p>
+                    )}
                   </div>
 
+                  {/* District */}
                   <div className="space-y-2">
                     <Label htmlFor="district">জেলা নির্বাচন করুন *</Label>
                     <select
                       id="district"
-                      {...register("district", { required: true })}
+                      {...register("district", {
+                        required: "জেলা নির্বাচন করুন",
+                      })}
                       className="w-full border rounded-md px-4 py-2 text-sm"
                     >
                       <option value="">-- জেলা নির্বাচন করুন --</option>
@@ -225,6 +253,11 @@ const Checkout = () => {
                         </option>
                       ))}
                     </select>
+                    {errors.district && (
+                      <p className="text-red-500 text-sm">
+                        {errors.district.message as string}
+                      </p>
+                    )}
                   </div>
                 </form>
               </CardContent>

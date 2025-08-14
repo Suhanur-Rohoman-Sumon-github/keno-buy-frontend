@@ -311,7 +311,6 @@ const OrdersManagement = () => {
   };
 
   const FraudDetectionDialog = ({ order }: { order: Order }) => {
-   
     if (!order.fraudData) {
       return (
         <DialogContent>
@@ -324,8 +323,6 @@ const OrdersManagement = () => {
     }
 
     const fraud = order.fraudData;
-
-   
 
     const statusColorClass = (status: string) => {
       switch (status) {
@@ -435,7 +432,7 @@ const OrdersManagement = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 ">
       <div>
         <h1 className="text-3xl font-bold">Orders Management</h1>
         <p className="text-muted-foreground">
@@ -540,75 +537,81 @@ const OrdersManagement = () => {
         <CardHeader>
           <CardTitle>Orders ({ordersArray?.length})</CardTitle>
         </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Order ID</TableHead>
-                <TableHead>Customer</TableHead>
-                <TableHead>Items</TableHead>
-                <TableHead>Total</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Payment</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {mappedOrders?.map((order: any) => (
-                <TableRow key={order.id}>
-                  <TableCell className="font-medium">{order.id}</TableCell>
-                  <TableCell>
-                    <div>
-                      <p className="font-medium">{order.firstName}</p>
-                    </div>
-                  </TableCell>
-                  <TableCell>{order?.products?.length} item(s)</TableCell>
-                  <TableCell>${order?.products.price?.toFixed(2)}</TableCell>
-                  <TableCell>
-                    <Badge className={getStatusColor(order.status)}>
-                      {getStatusIcon(order.status)}
-                      <span className="ml-1">{order.status}</span>
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      className={getPaymentStatusColor(order.paymentStatus)}
-                    >
-                      {order.paymentStatus}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    {new Date(order.createdAt).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button variant="ghost" size="sm">
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                      </DialogTrigger>
-                      <OrderDetailsDialog order={order} />
-                    </Dialog>
-
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          title="Detect Fraud"
-                          className="text-red-600 hover:bg-red-100"
+        <CardContent className="p-0">
+          {/* Outer container with horizontal scroll */}
+          <div className="w-full overflow-x-auto">
+            {/* Inner container ensures min width for table */}
+            <div className="min-w-[900px]">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Order ID</TableHead>
+                    <TableHead>Customer</TableHead>
+                    <TableHead>Items</TableHead>
+                    <TableHead>Total</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Payment</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {mappedOrders?.map((order: any) => (
+                    <TableRow key={order.id}>
+                      <TableCell className="font-medium">{order.id}</TableCell>
+                      <TableCell>
+                        <div>
+                          <p className="font-medium">{order.firstName}</p>
+                        </div>
+                      </TableCell>
+                      <TableCell>{order?.products?.length} item(s)</TableCell>
+                      <TableCell>${order?.total?.toFixed(2)}</TableCell>
+                      <TableCell>
+                        <Badge className={getStatusColor(order.status)}>
+                          {getStatusIcon(order.status)}
+                          <span className="ml-1">{order.status}</span>
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          className={getPaymentStatusColor(order.paymentStatus)}
                         >
-                          <AlertCircle className="h-4 w-4" />
-                        </Button>
-                      </DialogTrigger>
-                      <FraudDetectionDialog order={order} />
-                    </Dialog>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                          {order.paymentStatus}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {new Date(order.createdAt).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button variant="ghost" size="sm">
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          </DialogTrigger>
+                          <OrderDetailsDialog order={order} />
+                        </Dialog>
+
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              title="Detect Fraud"
+                              className="text-red-600 hover:bg-red-100"
+                            >
+                              <AlertCircle className="h-4 w-4" />
+                            </Button>
+                          </DialogTrigger>
+                          <FraudDetectionDialog order={order} />
+                        </Dialog>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>

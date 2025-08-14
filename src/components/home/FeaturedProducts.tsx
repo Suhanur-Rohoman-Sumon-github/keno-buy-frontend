@@ -8,7 +8,7 @@ import { Product } from "@/types";
 const mockProducts = [
   {
     _id: "6896ebe9e20bda58f95980be",
-    name: "t-shirt",
+    Title: "t-shirt",
     discountedPrice: 600,
     buyPrice: 100,
     originalPrice: 1000,
@@ -30,7 +30,7 @@ const mockProducts = [
   },
   {
     _id: "6899cdd5349d2018fdb4c670",
-    name: "Organic Green Tea",
+    Title: "Organic Green Tea",
     Description: "Premium organic green tea leaves sourced from the Himalayas.",
     discountedPrice: 8.792,
     buyPrice: 6.5,
