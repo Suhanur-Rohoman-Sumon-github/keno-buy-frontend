@@ -19,7 +19,7 @@ export const useGetAllProductsQuery = (queryParams: {
   searchTerm?: string | "";
 }, p0: { keepPreviousData: boolean; }, ) => {
 
-  console.log(`Fetching products with params: ${JSON.stringify(queryParams)}`);
+  
   
   const { data, refetch, isLoading, isError } = useQuery<any, Error>({
     

@@ -32,10 +32,10 @@ sort?: string | "";
 
 // ✅ Get single product by ID
 export const getSingleProduct = async (productId: string) => {
-console.log(`Fetching product with ID: ${productId}`);
+
   try {
     const { data } = await axiosInstance.get(`/products/${productId}`);
-    console.log(data);
+
     return data.data || {};
   } catch (error: any) {
     throw new Error(error.response?.data?.message || "Failed to fetch product");

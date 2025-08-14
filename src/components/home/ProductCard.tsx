@@ -38,7 +38,7 @@ const ProductCard = ({
   const [addedToCart, setAddedToCart] = useState(false);
   const { mutate: addTocart } = useAddToCartMutation();
 
-  console.log("ProductCard rendered with ID:", name);
+ 
 
   const handleAddToCart = () => {
     if (typeof window === "undefined") return;

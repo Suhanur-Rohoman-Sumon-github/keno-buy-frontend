@@ -28,7 +28,7 @@ const AdminDashboard = () => {
   const recentOrders = adminData?.recentOrders || [];
   const lowStockProducts = adminData?.lowStockProducts || [];
 
-  console.log("Admin Data:", adminData);
+ 
 
   // Sample data for dashboard
   const stats = [

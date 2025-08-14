@@ -40,9 +40,7 @@ const ReviewPage = () => {
     reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
 
   const handleSubmit = () => {
-    // You can connect this to your backend or Redux
-    console.log("Rating:", userRating);
-    console.log("Comment:", userComment);
+ 
     setUserRating(0);
     setUserComment("");
   };

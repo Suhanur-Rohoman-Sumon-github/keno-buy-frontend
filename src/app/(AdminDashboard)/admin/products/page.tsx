@@ -61,7 +61,7 @@ const ProductsManagement = () => {
 
   const { data: categories } = useGetCategoryQuery();
 
-  console.log("Categories:", categories);
+
 
   const [searchInput, setSearchInput] = useState("");
   const [searchTerm, setSearchTerm] = useState("");

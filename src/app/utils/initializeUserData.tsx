@@ -6,7 +6,7 @@ export const initializeUserData = () => {
     // Generate random email
     userEmail = `user${Math.floor(Math.random() * 100000)}@example.com`;
     localStorage.setItem("userEmail", userEmail);
-    console.log("Generated random email:", userEmail);
+  
 
     // Initialize empty cart
     localStorage.setItem("cart", JSON.stringify([]));

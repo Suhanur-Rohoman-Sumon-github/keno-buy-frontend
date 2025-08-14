@@ -65,7 +65,7 @@ export default function Signup() {
   });
 
   const onSubmit = (data: SignupValues) => {
-    console.log("Form Data:", data);
+   
     router.push(`/AccountStatus?email=${data.email}`);
     handleUserRegistration(data);
   };

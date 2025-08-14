@@ -63,7 +63,7 @@ export default function Signup() {
   });
 
   const onSubmit = (data: SignupValues) => {
-    console.log("Form Data:", data);
+ 
     router.push("/login");
     handleUserRegistration(data);
   };

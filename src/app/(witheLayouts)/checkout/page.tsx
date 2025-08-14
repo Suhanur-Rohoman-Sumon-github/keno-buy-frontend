@@ -67,11 +67,17 @@ const Checkout = () => {
     if (q) setDirectQuantity(Number(q));
   }, []);
 
-  const { data: singleProduct } = useGetSingleProduct(productId || "");
+  const { data: singleProduct, isLoading } = useGetSingleProduct(
+    productId || ""
+  );
   const { mutate: crateOrder } = usePlaceOrderMutation();
   const { data: cartData, isLoading: cartLoading } = useGetCart(
     userEmail || ""
   );
+
+  if (isLoading) {
+    <p>loading.....</p>;
+  }
 
   useEffect(() => {
     if (productId && singleProduct) {

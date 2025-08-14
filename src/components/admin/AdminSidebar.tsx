@@ -87,7 +87,7 @@ const AdminShell = ({ children }: AdminShellProps) => {
     role === "subadmin"
       ? sidebarItems.filter((item) => {
           const match = allowedForSubAdmin.includes(normalizePath(item.href));
-          console.log(`Checking ${item.href}: match=${match}`);
+         
           return match;
         })
       : sidebarItems;

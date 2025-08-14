@@ -311,7 +311,7 @@ const OrdersManagement = () => {
   };
 
   const FraudDetectionDialog = ({ order }: { order: Order }) => {
-    console.log(order);
+   
     if (!order.fraudData) {
       return (
         <DialogContent>
@@ -325,7 +325,7 @@ const OrdersManagement = () => {
 
     const fraud = order.fraudData;
 
-    console.log(fraud);
+   
 
     const statusColorClass = (status: string) => {
       switch (status) {
