@@ -25,7 +25,7 @@ export default function RootLayout({
           <div className="flex flex-col min-h-screen  md:max-w-7xl mx-auto">
             <Header />
             <OneSignalInit />
-            <main className=" ">
+            <main className=" bg-gray-100">
               {children}
 
               <Footer />

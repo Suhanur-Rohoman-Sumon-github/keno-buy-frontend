@@ -119,7 +119,7 @@ const Header = () => {
                 {hydrated &&
                   (user
                     ? isAvatarMenuOpen && (
-                        <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-md z-50">
+                        <div className="absolute right-0 mt-2 w-40 bg-gray-100 shadow-lg rounded-md z-50">
                           <button
                             onClick={() => {
                               handleLogout();
@@ -131,7 +131,7 @@ const Header = () => {
                         </div>
                       )
                     : isAvatarMenuOpen && (
-                        <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-md z-50">
+                        <div className="absolute right-0 mt-2 w-40 bg-gray-100 shadow-lg rounded-md z-50">
                           <button
                             onClick={() => {
                               setIsAvatarMenuOpen(false);
@@ -173,7 +173,7 @@ const Header = () => {
       {/* Left Sidebar */}
       <div
         className={clsx(
-          "fixed top-0 left-0 h-full w-64 bg-white shadow-lg z-50 transform transition-transform duration-300 ease-in-out",
+          "fixed top-0 left-0 h-full w-64 bg-gray-100 shadow-lg z-50 transform transition-transform duration-300 ease-in-out",
           isMenuOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >

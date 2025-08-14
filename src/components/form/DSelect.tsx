@@ -41,7 +41,7 @@ export default function DSelect({
           <SelectTrigger className="w-full">
             <SelectValue placeholder={`Select ${label}`} />
           </SelectTrigger>
-          <SelectContent className="bg-white shadow-lg rounded-md mt-1">
+          <SelectContent className="bg-gray-100 shadow-lg rounded-md mt-1">
             {options.map((option) => (
               <SelectItem key={option.key} value={option.key}>
                 {option.label}
@@ -72,7 +72,7 @@ export default function DSelect({
             <SelectTrigger className="w-full">
               <SelectValue placeholder={`Select ${label}`} />
             </SelectTrigger>
-            <SelectContent className="bg-white shadow-lg rounded-md mt-1">
+            <SelectContent className="bg-gray-100 shadow-lg rounded-md mt-1">
               {options.map((option) => (
                 <SelectItem key={option.key} value={option.key}>
                   {option.label}
