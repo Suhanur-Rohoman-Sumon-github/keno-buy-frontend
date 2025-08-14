@@ -126,8 +126,8 @@ const Checkout = () => {
         shippingFee,
       };
 
-      await crateOrder(orderPayload);
-      router.push("/OrderSuccess");
+      crateOrder(orderPayload);
+      console.log(orderPayload);
     } catch (error) {
       console.error("Order failed", error);
     } finally {
