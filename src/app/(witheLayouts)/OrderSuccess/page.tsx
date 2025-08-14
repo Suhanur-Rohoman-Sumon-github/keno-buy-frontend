@@ -108,11 +108,6 @@ const OrderSuccess = () => {
           {/* Action Buttons */}
           <div className="space-y-4">
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href={`/track-order/${orderNumber}`}>
-                <Button variant="outline" className="w-full sm:w-auto">
-                  Track Your Order
-                </Button>
-              </Link>
               <Link href="/">
                 <Button className="w-full sm:w-auto">Continue Shopping</Button>
               </Link>
