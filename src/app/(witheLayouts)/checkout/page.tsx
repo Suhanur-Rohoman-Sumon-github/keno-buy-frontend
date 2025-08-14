@@ -128,6 +128,7 @@ const Checkout = () => {
 
       crateOrder(orderPayload);
       console.log(orderPayload);
+      router.push("/");
     } catch (error) {
       console.error("Order failed", error);
     } finally {
